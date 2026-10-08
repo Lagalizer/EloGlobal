@@ -1,8 +1,8 @@
 @echo off
-title Dizcord - setup
+title EloGlobal - setup
 cd /d "%~dp0"
 echo.
-echo  Dizcord Translator - portable setup
+echo  EloGlobal Translator - portable setup
 echo  Everything is installed inside this folder (runtime\). No admin rights needed.
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\setup.ps1"

@@ -3,9 +3,10 @@
 Plays a synthetic English sentence into the virtual cable ("CABLE Input"), then:
   incoming pipeline: loopback of CABLE Input  -> Whisper -> translate -> voice
   outgoing pipeline: CABLE Output (as "mic")  -> Whisper -> translate -> voice
-Translated voices are captured in memory (not played), so you hear nothing.
+Translated voices are captured in memory (not played), so you hear nothing. Every engine runs on this PC
+(Whisper, OPUS-MT, the voices of this PC); the first run downloads the models it needs.
 
-Usage:  runtime\\python.exe tools\\selftest.py  [whisper-model]
+Usage:  runtime\\python.exe -s tools\\selftest.py  [whisper-model]
 """
 import os
 import sys
@@ -15,12 +16,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-os.environ.setdefault("HF_HOME", str(ROOT / "models" / "huggingface"))
 
-from dizcord import config  # noqa: E402
-from dizcord.audio import devices  # noqa: E402
-from dizcord.audio.player import OutputDevice  # noqa: E402
-from dizcord.engine import Engine  # noqa: E402
+from eloglobal import config  # noqa: E402
+
+os.environ.setdefault("HF_HOME", str(config.MODELS_DIR / "huggingface"))
+from eloglobal.audio import devices  # noqa: E402
+from eloglobal.audio.player import OutputDevice  # noqa: E402
+from eloglobal.engine import Engine  # noqa: E402
 
 SENTENCE = "Hello everyone, I think we should attack the bomb site together right now."
 
@@ -40,8 +42,8 @@ def main():
     prof["incoming"].update({"source_lang": "auto", "target_lang": "pt"})
     prof["outgoing"].update({"source_lang": "auto", "target_lang": "es"})
     prof["stt"] = {"provider": "faster_whisper", "settings": {"faster_whisper": {"model": model}}}
-    prof["translation"]["provider"] = "google_free"
-    prof["tts"]["provider"] = "edge"
+    prof["translation"]["provider"] = "opus_mt"
+    prof["tts"]["provider"] = "local"
 
     events, done = [], threading.Event()
 
@@ -80,7 +82,7 @@ def main():
 
     eng.speakers = {d: SilentSpeaker(d) for d in ("incoming", "outgoing")}
 
-    print(f"Loading Whisper '{model}' (first run downloads it into models\\)…")
+    print(f"Loading Whisper '{model}' and the translation models (the first run downloads them)…")
     eng.start()
     t0 = time.time()
     while not eng.pipelines and eng.running and time.time() - t0 < 600:
@@ -91,7 +93,7 @@ def main():
     time.sleep(1.0)
 
     print("Synthesizing test sentence…")
-    audio, sr = eng.provider("tts").synthesize(SENTENCE, "en", "auto")
+    audio, sr = eng.provider("tts").synthesize(SENTENCE, "en", "piper:en_US-kristin-medium")
     print(f"Playing {len(audio) / sr:.1f}s of speech into {cable}…")
     out = OutputDevice(cable)
     out.open()

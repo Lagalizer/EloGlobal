@@ -1,4 +1,5 @@
-﻿# Builds / repairs the portable runtime inside the app folder:
+﻿# Builds / repairs the development runtime inside the app folder (users get the ready build of
+# tools\build_store.py instead):
 #   runtime\          private Python (embeddable distribution) + all packages
 # Nothing is installed system-wide and no admin rights are needed.
 param(
@@ -59,28 +60,13 @@ if ($Packages.Count -gt 0) {
 } else {
     Step "Installing app packages (first time takes a few minutes)"
     & $Py -m pip install --no-warn-script-location --no-build-isolation -r (Join-Path $Root $Requirements)
+    if ($LASTEXITCODE -eq 0) {
+        # faster-whisper without PyAV (GPL encoders in its FFmpeg build) - see requirements.txt
+        & $Py -m pip install --no-warn-script-location --no-build-isolation --no-deps -r (Join-Path $Root "requirements-nodeps.txt")
+    }
 }
 if ($LASTEXITCODE -ne 0) { throw "Package installation failed (see messages above)" }
 
-# Offline natural voice for the Manual (Piper, ~60 MB). Saved inside the app folder (models\piper), once.
-if ($Packages.Count -eq 0) {
-    $PiperDir = Join-Path $Root "models\piper"
-    $Voice = "en_US-kristin-medium"
-    if (-not (Test-Path (Join-Path $PiperDir "$Voice.onnx.json"))) {
-        Step "Downloading the offline voice for the Manual (~60 MB, once)"
-        try {
-            New-Item -ItemType Directory -Force $PiperDir | Out-Null
-            $base = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/kristin/medium/$Voice"
-            Invoke-WebRequest -Uri "$base.onnx" -OutFile (Join-Path $PiperDir "$Voice.onnx") -UseBasicParsing
-            Invoke-WebRequest -Uri "$base.onnx.json" -OutFile (Join-Path $PiperDir "$Voice.onnx.json") -UseBasicParsing
-        } catch {
-            # not fatal: the Manual falls back to the online / Windows voice. Run setup.bat again to retry.
-            Remove-Item (Join-Path $PiperDir "$Voice.onnx*") -ErrorAction SilentlyContinue
-            Write-Host "Could not download the offline voice ($($_.Exception.Message)). Run setup.bat again later." -ForegroundColor Yellow
-        }
-    }
-}
-
 Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue
 Set-Content -Path $Ready -Encoding ascii -Value "ok"
-Step "Done. Start the app with Dizcord.bat"
+Step "Done. Start the app with EloGlobal.bat"

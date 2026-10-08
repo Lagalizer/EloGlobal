@@ -1,0 +1,138 @@
+EloGlobal - third-party software, models, voices and fonts
+=========================================================
+
+EloGlobal itself is MIT-licensed (see LICENSE). It is built on the components below. The complete licence text
+of every component is in the licenses\ folder of the installed app (collected by tools\build_store.py from each
+package), together with the source code of eSpeak NG.
+
+"Shipped" = included in the app package. "Downloaded" = fetched once from its publisher when the feature is first
+used (the user's PC downloads it directly; the app sends nothing else). Nothing in this list forbids commercial use.
+
+---------------------------------------------------------------------------------------------------------------
+1. Runtime and libraries (shipped)
+---------------------------------------------------------------------------------------------------------------
+Python 3.13 (embeddable)        PSF License 2.0             (c) Python Software Foundation
+  includes OpenSSL (Apache-2.0), libffi (MIT), SQLite (public domain), zlib (zlib), bzip2 (bzip2), xz (0BSD),
+  expat (MIT), mpdecimal (BSD-2-Clause), Microsoft Visual C++ runtime (redistributable under Microsoft's terms)
+PySide6-Essentials / shiboken6  LGPL-3.0-only               (c) The Qt Company - see "Qt / LGPL" below
+numpy                           BSD-3-Clause (+0BSD, MIT, Zlib, CC0 parts)   (c) NumPy Developers
+  includes OpenBLAS (BSD-3-Clause) and the GCC runtime (GPL-3 with the GCC Runtime Library Exception)
+scipy                           BSD-3-Clause                (c) SciPy Developers - includes OpenBLAS (BSD-3-Clause)
+sounddevice                     MIT                         (c) Matthias Geier - includes PortAudio (MIT)
+                                (the ASIO-enabled PortAudio DLLs are removed from the package)
+soundfile                       BSD-3-Clause                (c) Bastian Bechtold - includes libsndfile (LGPL-2.1,
+                                dynamically loaded DLL; source: https://github.com/libsndfile/libsndfile)
+PyAudioWPatch                   Apache-2.0                  (c) s0d3s - includes PortAudio (MIT)
+ctranslate2                     MIT                         (c) OpenNMT / SYSTRAN - includes Intel oneMKL and
+                                Intel OpenMP runtime (Intel Simplified Software License, redistributable),
+                                oneDNN (Apache-2.0), NVIDIA cuDNN (NVIDIA cuDNN SLA, redistributable runtime)
+faster-whisper                  MIT                         (c) SYSTRAN (installed without PyAV, see section 6)
+onnxruntime                     MIT                         (c) Microsoft - see its ThirdPartyNotices in licenses\
+tokenizers                      Apache-2.0                  (c) Hugging Face
+huggingface_hub                 Apache-2.0                  (c) Hugging Face
+hf-xet                          Apache-2.0                  (c) Hugging Face
+sentencepiece                   Apache-2.0                  (c) Google
+PyYAML                          MIT                         (c) Ingy döt Net, Kirill Simonov
+langdetect                      Apache-2.0                  (c) Nakatani Shuyo / Mimino666 (language profiles)
+keyboard                        MIT                         (c) BoppreH
+pynput                          LGPL-3.0                    (c) Moses Palmér (pure Python, replaceable files)
+mss                             MIT                         (c) Mickaël Schoentgen
+uiautomation                    Apache-2.0                  (c) yinkaisheng
+comtypes                        MIT                         (c) Thomas Heller and contributors
+winrt-* (PyWinRT)               MIT                         (c) the PyWinRT contributors
+protobuf                        BSD-3-Clause                (c) Google
+flatbuffers                     Apache-2.0                  (c) Google
+httpx, httpcore                 BSD-3-Clause                (c) Encode OSS Ltd.
+anyio                           MIT                         (c) Alex Grönholm
+h11                             MIT                         (c) Nathaniel J. Smith
+idna                            BSD-3-Clause                (c) Kim Davies
+certifi                         MPL-2.0                     (c) Kenneth Reitz (unmodified; source on PyPI)
+filelock                        MIT (Unlicense-style)       (c) Benedikt Schmitt and contributors
+fsspec                          BSD-3-Clause                (c) Anaconda, Inc. and contributors
+packaging                       Apache-2.0 OR BSD-2-Clause  (c) Donald Stufft and contributors
+tqdm                            MPL-2.0 AND MIT             (c) tqdm developers (unmodified; source on PyPI)
+click                           BSD-3-Clause                (c) Pallets
+colorama                        BSD-3-Clause                (c) Jonathan Hartley
+cffi, pycparser                 MIT-0 / BSD-3-Clause        (c) Armin Rigo, Maciej Fijalkowski / Eli Bendersky
+six                             MIT                         (c) Benjamin Peterson
+typing_extensions               PSF-2.0                     (c) Python Software Foundation
+
+---------------------------------------------------------------------------------------------------------------
+2. eSpeak NG (shipped as a separate program)
+---------------------------------------------------------------------------------------------------------------
+eSpeak NG 1.52.0                GPL-3.0-or-later            (c) Reece H. Dunn, Jonathan Duddington and contributors
+  engines\espeak-ng\espeak-ng.exe, libespeak-ng.dll and espeak-ng-data, unmodified, from the official release
+  https://github.com/espeak-ng/espeak-ng/releases/tag/1.52.0 (espeak-ng.msi).
+  EloGlobal runs it as its own program and exchanges plain text with it through a pipe (text in, phonemes out);
+  none of its code is part of EloGlobal. Its complete corresponding source code is included in
+  licenses\espeak-ng\espeak-ng-1.52.0.tar.gz, and its licence in licenses\espeak-ng\COPYING.
+  You may replace engines\espeak-ng with any other build of eSpeak NG.
+
+---------------------------------------------------------------------------------------------------------------
+3. Models (downloaded when first used)
+---------------------------------------------------------------------------------------------------------------
+Whisper speech recognition      MIT                         (c) OpenAI - weights converted for CTranslate2 by
+  models (tiny ... large-v3-turbo)                          SYSTRAN / mobiuslabs / Systran (huggingface.co/Systran)
+OPUS-MT translation models      CC-BY-4.0                   (c) Language Technology Research Group, University of
+                                                            Helsinki - Jörg Tiedemann and contributors.
+  "OPUS-MT - Building open translation services for the World" (Tiedemann & Thottingal, EAMT 2020) and
+  "The Tatoeba Translation Challenge" (Tiedemann, WMT 2020). Downloaded from https://object.pouta.csc.fi/
+  Tatoeba-MT-models and converted on the user's PC to the CTranslate2 format (int8). Each converted model keeps the
+  original README and LICENSE next to it (in the models folder).
+Kokoro-82M v1.0 (voices)        Apache-2.0                  (c) hexgrad (huggingface.co/hexgrad/Kokoro-82M),
+                                                            ONNX export by thewh1teagle (kokoro-onnx, MIT)
+  The phoneme table in eloglobal\kokoro_vocab.py comes from the model's config.json (Apache-2.0).
+NVIDIA cuBLAS 12 and cuDNN 9    NVIDIA Software License     (c) NVIDIA Corporation - only when the user presses
+  (optional, graphics card)     Agreement / cuDNN SLA       "Set up the graphics card": downloaded from NVIDIA's own
+  packages on PyPI (nvidia-cublas-cu12, nvidia-cudnn-cu12); their licence files are kept next to the DLLs
+  (models\gpu). NVIDIA's terms allow these runtime libraries to be distributed with applications.
+
+---------------------------------------------------------------------------------------------------------------
+4. Voices (Piper voice files, downloaded when first used; the English one is shipped)
+---------------------------------------------------------------------------------------------------------------
+Only voices trained from scratch on data whose licence allows commercial use are offered. Piper voices fine-tuned
+from the "lessac" voice (Blizzard 2013 data, non-commercial) or "ryan" (CC-BY-NC-SA) are not used.
+Voice files: https://huggingface.co/rhasspy/piper-voices (Rhasspy / Open Home Foundation voice project).
+
+en_US-kristin-medium (shipped)  public domain   dataset by Bryce Beattie, recordings from LibriVox
+en_US-norman-medium             public domain   dataset by Bryce Beattie, recordings from LibriVox
+en_US-john-medium               public domain   Bryce Beattie (fine-tuned from Kristin)
+en_GB-cori-medium               public domain   dataset by Bryce Beattie, recordings from LibriVox
+de_DE-mls-medium                CC-BY-4.0       Multilingual LibriSpeech (Pratap et al. 2020, openslr.org/94)
+fr_FR-mls-medium                CC-BY-4.0       Multilingual LibriSpeech (Pratap et al. 2020, openslr.org/94)
+es_ES-carlfm-x_low              public domain   github.com/carlfm01/my-speech-datasets
+it_IT-serena-medium             CC-BY-4.0       committa/serena-synthetic-it-27h (synthetic speech made with
+                                                Qwen3-TTS, Apache-2.0)
+uk_UA-ukrainian_tts-medium      CC0-1.0         ukrainian_tts dataset (OHF-Voice voice-datasets)
+Windows voices                  part of Windows (Microsoft) - used through the Windows speech API, not shipped
+
+---------------------------------------------------------------------------------------------------------------
+5. Fonts, icons and artwork
+---------------------------------------------------------------------------------------------------------------
+EloGlobal logo, app icon and store graphics - original artwork made for EloGlobal (MIT, see LICENSE).
+  The letters of the wordmark are outlines of Poppins SemiBold, (c) 2020 The Poppins Project Authors,
+  SIL Open Font License 1.1 (the font file is not shipped).
+The app uses the fonts installed in Windows (Segoe UI); no font is shipped.
+Emoji shown in the interface are drawn by Windows' own emoji font.
+
+---------------------------------------------------------------------------------------------------------------
+6. Left out on purpose
+---------------------------------------------------------------------------------------------------------------
+PyAV / FFmpeg     its Windows wheels contain GPL encoders (x264, x265); faster-whisper only needs it to decode
+                  audio files, which EloGlobal never does - a stand-in module answers the import.
+piper-tts 1.3+, phonemizer, espeakng-loader   GPL-3 code that would run inside the app process; replaced by our
+                  own MIT runners and the separate eSpeak NG program (section 2).
+NLLB-200          CC-BY-NC-4.0 (non-commercial).
+VB-Audio Virtual Cable   not included - the app only links to https://vb-audio.com/Cable/ ; users install it
+                  themselves under VB-Audio's own licence.
+Online services (Google, Microsoft Edge voices, OpenAI, DeepL...)   not used - everything runs on the PC.
+
+---------------------------------------------------------------------------------------------------------------
+Qt / LGPL
+---------------------------------------------------------------------------------------------------------------
+EloGlobal uses the Qt 6.11 libraries through PySide6 under the GNU Lesser General Public License v3
+(licenses\PySide6). The Qt and PySide6 DLLs in runtime\Lib\site-packages\PySide6 and shiboken6 are unmodified and
+dynamically loaded - you may replace them with your own builds of the same version. Source code: Qt
+https://download.qt.io/official_releases/qt/6.11/ and PySide6 https://code.qt.io/cgit/pyside/pyside-setup.git
+(tag v6.11.2). On request (see the store page for the contact) we will send you a copy of that source code.
+The same applies to pynput (LGPL-3.0) and libsndfile (LGPL-2.1).

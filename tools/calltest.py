@@ -1,6 +1,6 @@
 """Call test - a pretend voice call, no microphone, no Discord call and nothing you can hear.
 
-    runtime\\python.exe tools\\calltest.py  [whisper-model]        (default: base)
+    runtime\\python.exe -s tools\\calltest.py  [whisper-model]        (default: base)
 
 A stand-in for Discord (a second process) talks English into the virtual cable while the app translates it:
   1. Discord-only listening: 6 sentences, some while the app voice is still talking. Every sentence must be
@@ -10,7 +10,8 @@ A stand-in for Discord (a second process) talks English into the virtual cable w
   2. No headphones (worst case): your translated voice goes into the cable your "microphone" records, so the mic
      hears the app's own voice - the echo filter must ignore it (no translation loop).
 Prints how long after the end of each sentence the translated voice started.
-Uses the free engines (Whisper on this PC, Google free, Edge voices); needs VB-Audio Virtual Cable and internet.
+Every engine runs on this PC (Whisper, OPUS-MT, the voices of this PC). Needs VB-Audio Virtual Cable; the first
+run downloads the models it needs.
 """
 import json
 import os
@@ -23,7 +24,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-os.environ.setdefault("HF_HOME", str(ROOT / "models" / "huggingface"))
 
 SENTENCES = [
     "Hello everyone, can you hear me clearly?",
@@ -40,8 +40,8 @@ def fake_app(device: str):
     import numpy as np
     import sounddevice as sd
     import soundfile as sf
-    from dizcord.audio import devices
-    from dizcord.audio.utils import resample
+    from eloglobal.audio import devices
+    from eloglobal.audio.utils import resample
     idx = devices.find_device(device, "output")
     sr_out = int(devices.device_info(idx)["default_samplerate"])
     print(json.dumps({"pid": os.getpid()}), flush=True)
@@ -66,19 +66,25 @@ def which(text: str) -> list[int]:
     return [i for i, s in enumerate(SENTENCES) if len(words(s) & words(text)) >= 0.6 * len(words(s))]
 
 
+def from_talker(text: str) -> bool:
+    """A sentence of the stand-in, or a piece of one (people pause at a comma: "Okay," can come on its own)."""
+    w = words(text)
+    return bool(which(text)) or bool(w) and any(len(w & words(s)) >= 0.8 * len(w) for s in SENTENCES)
+
+
 class Run:
     """One engine + one stand-in process; collects events."""
 
     def __init__(self, prof, feed_device):
-        from dizcord import config
-        from dizcord.engine import Engine
+        from eloglobal import config
+        from eloglobal.engine import Engine
         self.fake = subprocess.Popen([sys.executable, __file__, "--fake", feed_device], stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE, text=True)
         self.pid = json.loads(self.fake.stdout.readline())["pid"]
         self.played = []
         threading.Thread(target=lambda: [self.played.append(json.loads(ln)) for ln in self.fake.stdout],
                          daemon=True).start()
-        self.events, self.lock = [], threading.Lock()
+        self.events, self.lock, self.latencies = [], threading.Lock(), []
         if prof["input"]["listen_mode"] == "app":
             prof["input"]["listen_app"] = f"pid:{self.pid}"
         self.eng = Engine(prof, config.KeyStore(), self._emit)
@@ -128,7 +134,10 @@ class Run:
             sp = spoken.get(ln["id"])
             ends = [self.played[i]["end"] for i in hit if i < len(self.played)]
             lat = f"{sp['t'] - max(ends):.1f}s after the sentence ended" if sp and ends else "-"
-            print(f"   {hit} {ln['original']}\n       → {ln['translated']}   (voice started {lat})")
+            if sp and ends:
+                self.latencies.append(sp["t"] - max(ends))
+            tm = " · ".join(f"{k} {v:.2f}s" for k, v in (sp or {}).get("timings", {}).items())
+            print(f"   {hit} {ln['original']}\n       → {ln['translated']}   (voice started {lat}; {tm})")
         return order
 
 
@@ -136,11 +145,14 @@ def main():
     if "--fake" in sys.argv:
         return fake_app(sys.argv[sys.argv.index("--fake") + 1])
     import soundfile as sf
-    from dizcord import config
-    from dizcord.audio import devices, winaudio
-    from dizcord.providers.tts import EdgeTTS
-    from dizcord.speech import Utterance
+    from eloglobal import config, localvoice
+    from eloglobal.audio import devices, winaudio
+    from eloglobal.speech import Utterance
+    os.environ.setdefault("HF_HOME", str(config.MODELS_DIR / "huggingface"))
     model = next((a for a in sys.argv[1:] if not a.startswith("-")), "base")
+    import logging
+    logging.basicConfig(filename=str(config.DATA_DIR / "calltest.log"), level=logging.INFO, encoding="utf-8",
+                        format="%(asctime)s %(name)s: %(message)s")
     cable = devices.find_virtual_cable()
     if not cable:
         print("FAIL: no virtual cable (CABLE Input) found - install VB-Audio Virtual Cable.")
@@ -149,22 +161,22 @@ def main():
         print("Discord is recording right now (in a call?) - this test plays into the virtual cable, so it waits "
               "until you leave the call.")
         return 1
-    tmp = ROOT / "data" / "calltest"
+    tmp = config.DATA_DIR / "calltest"
     tmp.mkdir(parents=True, exist_ok=True)
-    edge = EdgeTTS({}, None)
+    talker = os.environ.get("CALLTEST_VOICE", "piper:en_US-norman-medium")      # the people in the "call"
     wavs = []
     for i, s in enumerate(SENTENCES):
-        p = tmp / f"sentence{i}.wav"
+        p = tmp / f"sentence{i}-{talker.replace(':', '_')}.wav"
         if not p.exists():
-            a, sr = edge.synthesize(s, "en", "en-US-GuyNeural")
+            a, sr = localvoice.synthesize(talker, s, "en")
             sf.write(p, a, sr)
         wavs.append(p)
 
     def profile():
         prof = config.default_profile()
         prof["stt"] = {"provider": "faster_whisper", "settings": {"faster_whisper": {"model": model}}}
-        prof["translation"]["provider"] = "google_free"
-        prof["tts"]["provider"] = "edge"
+        prof["translation"]["provider"] = "opus_mt"
+        prof["tts"]["provider"] = "local"
         return prof
 
     ok = True
@@ -178,7 +190,8 @@ def main():
     print(f"1. Listening to 'Discord' only, Whisper '{model}' (first run downloads it)…")
     prof = profile()
     prof["input"].update(listen_mode="app")
-    prof["incoming"].update(output_device=cable, source_lang="en", target_lang="pt", hear_originals=False)
+    prof["incoming"].update(output_device=cable, source_lang="en", target_lang=os.environ.get("CALLTEST_IN", "pt"),
+                            hear_originals=False)
     prof["outgoing"]["enabled"] = False
     r = Run(prof, cable)
     r.eng.start()
@@ -230,7 +243,8 @@ def main():
     r.close()
     check("every sentence translated, none dropped", sorted(set(order)) == list(range(len(SENTENCES))))
     check("in the order they were said", order == sorted(order), order)
-    check("the app never heard its own voice", all(which(ln["original"]) for ln in lines))
+    check("the app never heard its own voice", all(from_talker(ln["original"]) for ln in lines))
+    lat1 = r.latencies
     check("never two app voices at once (chat messages included)", stats["parallel"] == 1, stats["parallel"])
     check("listening never paused while the app talked", stats["paused"] == 0)
     check("Hear people off: Discord turned down while running", stats["levels"] and max(stats["levels"]) <= 0.0011,
@@ -243,7 +257,7 @@ def main():
     prof["incoming"]["enabled"] = False
     rec = next((n for n in devices.input_devices() if n.lower().startswith("cable output")), "CABLE Output")
     prof["input"].update(mic_device=rec, mic_mode="vad", ignore_mic_while_playing=False)
-    prof["outgoing"].update(source_lang="auto", target_lang="es", output_device=cable)
+    prof["outgoing"].update(source_lang="auto", target_lang=os.environ.get("CALLTEST_OUT", "es"), output_device=cable)
     r = Run(prof, cable)
     r.eng.start()
     while "outgoing" not in r.eng.pipelines and r.eng.running and time.monotonic() < end:
@@ -255,7 +269,10 @@ def main():
     lines = r.lines()
     r.close()
     check("all 4 sentences translated once, in order", order == [0, 1, 2, 3], order)
-    check("its own voice was never translated again (no loop)", all(which(ln["original"]) for ln in lines))
+    check("its own voice was never translated again (no loop)", all(from_talker(ln["original"]) for ln in lines))
+    if lat1:
+        print(f"\nLatency (end of a sentence -> translated voice starts), Discord-only listening: first "
+              f"{lat1[0]:.1f}s, median {sorted(lat1)[len(lat1) // 2]:.1f}s, max {max(lat1):.1f}s")
     print("\nPASS" if ok else "\nFAIL")
     return 0 if ok else 1
 
