@@ -1,5 +1,19 @@
 # EloGlobal - changelog
 
+## 1.0.1 - 2026-10-15 - text-only voice translation, GitHub download with updates
+
+- **Text only in voice calls**: Dashboard → *Speak the translations* (same as Live → *Speak translation*) off = the
+  translations of the others are only shown as text (the subtitles window opens; with names when *Who is talking*
+  is set up) and you hear the people with their own voices - Discord is no longer turned down and *Hear people* is
+  greyed out. Turning it off while a translation is being said stops it. Your own translated voice is unchanged.
+  Translated into the 9 other app languages.
+- **GitHub download**: `tools/build_store.py` also makes `dist/github/EloGlobal-<version>-windows-x64.zip` (the app
+  folder + `update.json`). Only that copy has *Settings → Updates* (`eloglobal/updater.py`): it asks GitHub for the
+  newest release (at start-up, can be turned off, and on request), downloads its zip into the data folder, and a
+  small script copies it over the app folder after EloGlobal closes, then starts it again (user data, downloaded
+  models and `portable.txt` are kept; log in `logs/update.log`). Microsoft Store and Steam builds have no
+  `update.json` and stay updated by their store. PRIVACY.md lists the new connection.
+
 ## 1.0.0 - 2026-10-08 - first store edition (from Dizcord 0.6.0, GitHub edition)
 
 **New name and look.** Dizcord becomes EloGlobal ("elo" = link): new logo, icon and teal/amber theme (no Discord

@@ -6,13 +6,13 @@ from __future__ import annotations
 import subprocess
 import sys
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import QObject, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QFont
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QFontComboBox, QFormLayout, QGroupBox,
                                QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
                                QWidget)
 
-from .. import APP_NAME, __version__, config, i18n, voice_download
+from .. import APP_NAME, __version__, config, i18n, updater, voice_download
 from .widgets import DataCombo, DeviceCombo, VolumeSlider, run_async
 
 APPEARANCE_DEFAULTS = {
@@ -24,6 +24,10 @@ APPEARANCE_DEFAULTS = {
     "popup_pt": 11.5,         # highlight-to-translate / OCR popup
     "always_on_top": False,   # keep the EloGlobal window above other windows
 }
+
+
+class _UpdProgress(QObject):
+    progress = Signal(object, object)   # done bytes, total bytes (from the download thread)
 
 
 def _muted(text):
@@ -172,6 +176,9 @@ class SettingsTabMixin:
         bl = QVBoxLayout(box)
         bl.addWidget(_muted("Everything runs on this PC: speech recognition, translation and voices. Nothing you "
                             "or the people in the call say or write is sent to the internet. Models and voices are "
+                            "downloaded once; updates come from GitHub (Updates below)." if updater.repo() else
+                            "Everything runs on this PC: speech recognition, translation and voices. Nothing you "
+                            "or the people in the call say or write is sent to the internet. Models and voices are "
                             "downloaded once; updates come from the store."))
         bl.addWidget(self.bind(QCheckBox("Save transcripts of calls (other people's words too) in the data folder"),
                                "ui.autosave_transcript"))
@@ -185,6 +192,8 @@ class SettingsTabMixin:
         row.addStretch(1)
         bl.addLayout(row)
         v.addWidget(box)
+        if updater.repo():
+            v.addWidget(self._build_updates_box())
 
         # ---------------------------------------------------------- windows & folders
         box = QGroupBox("Windows && folders")
@@ -278,6 +287,99 @@ class SettingsTabMixin:
     def _show_about(self):
         from .about import AboutDialog
         AboutDialog(self).exec()
+
+    # ------------------------------------------------------------------ updates (GitHub zip edition only)
+    def _build_updates_box(self):
+        box = QGroupBox("Updates")
+        bl = QVBoxLayout(box)
+        row = QHBoxLayout()
+        self.upd_check_btn = QPushButton("⟳ Check for updates")
+        self.upd_check_btn.clicked.connect(lambda: self._upd_check(quiet=False))
+        self.upd_apply_btn = QPushButton("⬇ Update now")
+        self.upd_apply_btn.setObjectName("primary")
+        self.upd_apply_btn.setVisible(False)
+        self.upd_apply_btn.clicked.connect(self._upd_apply)
+        row.addWidget(self.upd_check_btn)
+        row.addWidget(self.upd_apply_btn)
+        self.upd_label = QLabel(f"You have version {__version__}.")
+        self.upd_label.setWordWrap(True)
+        row.addWidget(self.upd_label, 1)
+        bl.addLayout(row)
+        auto = QCheckBox("Check for updates when EloGlobal starts")
+        auto.setChecked(bool(self.state.get("check_updates", True)))
+        auto.toggled.connect(self._upd_auto_changed)
+        bl.addWidget(auto)
+        bl.addWidget(_muted(f"Downloads the newest release from github.com/{updater.repo()} and replaces the program "
+                            "files after EloGlobal closes. Your settings, profiles, transcripts and downloaded models "
+                            "are never touched. Checking only asks GitHub for the newest version number."))
+        self._upd_release = None
+        if self.state.get("check_updates", True) and "--smoke" not in sys.argv:
+            QTimer.singleShot(5000, lambda: self._upd_check(quiet=True))
+        return box
+
+    def _upd_auto_changed(self, on: bool):
+        self.state["check_updates"] = bool(on)
+        try:
+            config.save_app_state(self.state)
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _upd_check(self, quiet: bool):
+        self.upd_check_btn.setEnabled(False)
+        if not quiet:
+            self.upd_label.setText("Checking…")
+
+        def done(rel, err):
+            self.upd_check_btn.setEnabled(True)
+            if err:
+                if not quiet:
+                    self.upd_label.setText(f"⚠ Could not check: {err}")
+                return
+            self._upd_release = rel
+            if rel.newer:
+                self.upd_label.setText(f"⬆ New version {rel.tag} is available (you have {__version__}).")
+                self.upd_apply_btn.setText(f"⬇ Update to {rel.tag} ({rel.size / 1e6:,.0f} MB)")
+                self.upd_apply_btn.setVisible(True)
+                self.setStatus(f"New version {rel.tag} available - Settings → Updates.")
+            else:
+                self.upd_apply_btn.setVisible(False)
+                if not quiet:
+                    self.upd_label.setText(f"✔ You have the latest version ({__version__}).")
+        run_async(updater.check, done)
+
+    def _upd_apply(self):
+        rel = self._upd_release
+        if not rel or not rel.newer:
+            return
+        if QMessageBox.question(self, "Update", f"Download {rel.tag} ({rel.size / 1e6:,.0f} MB) and install it?\n"
+                                "EloGlobal closes, updates itself and opens again. Your settings and models are "
+                                "kept.") != QMessageBox.Yes:
+            return
+        self.upd_apply_btn.setEnabled(False)
+        self.upd_check_btn.setEnabled(False)
+        self.upd_label.setText(f"Downloading {rel.tag}…")
+        relay = _UpdProgress(self)
+        relay.progress.connect(lambda d, t: self.upd_label.setText(
+            f"Downloading {rel.tag}… {d / 1e6:,.0f} of {t / 1e6:,.0f} MB" if t else f"Downloading {rel.tag}…"))
+
+        def done(app_dir, err):
+            self.upd_apply_btn.setEnabled(True)
+            self.upd_check_btn.setEnabled(True)
+            if err:
+                self.upd_label.setText(f"⚠ Update failed (nothing was changed): {err}")
+                return
+            try:
+                self.save_profile(quiet=True)
+            except Exception:  # noqa: BLE001
+                pass
+            try:
+                updater.install_on_exit(app_dir)
+            except Exception as e:  # noqa: BLE001
+                self.upd_label.setText(f"⚠ Update failed (nothing was changed): {e}")
+                return
+            self.upd_label.setText(f"Installing {rel.tag}… EloGlobal opens again in a moment.")
+            QApplication.quit()
+        run_async(lambda: updater.download(rel, lambda d, t: relay.progress.emit(d, t)), done)
 
     def _restart_app(self):
         try:

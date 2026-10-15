@@ -597,5 +597,9 @@
  "Downloading NVIDIA's libraries (about 1.3 GB, only once)…": "NVIDIA kitaplıkları indiriliyor (yaklaşık 1,3 GB, yalnızca bir kez)…",
  "Ready. Restart EloGlobal to use the graphics card.": "Hazır. Ekran kartını kullanmak için EloGlobal'i yeniden başlatın.",
  "A part of EloGlobal is missing (uiautomation) - reinstall EloGlobal.": "EloGlobal'in bir parçası eksik (uiautomation) - EloGlobal'i yeniden yükleyin.",
- "⚠ Screen OCR: a part of EloGlobal is missing (winrt) - reinstall EloGlobal.": "⚠ Ekran OCR: EloGlobal'in bir parçası eksik (winrt) - EloGlobal'i yeniden yükleyin."
+ "⚠ Screen OCR: a part of EloGlobal is missing (winrt) - reinstall EloGlobal.": "⚠ Ekran OCR: EloGlobal'in bir parçası eksik (winrt) - EloGlobal'i yeniden yükleyin.",
+ "Speak the translations (off: only show the text of who is talking)": "Çevirileri seslendir (kapalı: yalnızca konuşanın metnini göster)",
+ "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Kapalı: çeviriler yalnızca metin olarak gösterilir (altyazı penceresi ve Canlı sekmesi) ve görüşmedeki kişileri kendi sesleriyle duyarsınız.",
+ "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Kapalı: yalnızca konuşanın metnini göster (altyazı) - onları kendi sesleriyle duyarsınız",
+ "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Yalnızca metin: çeviriler altyazı penceresinde gösterilir ve görüşmedeki kişileri kendi sesleriyle duyarsınız. İsimler: Çıkış sekmesi → Kim konuşuyor."
 }

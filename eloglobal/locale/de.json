@@ -595,5 +595,9 @@
  "Downloading NVIDIA's libraries (about 1.3 GB, only once)…": "NVIDIA-Bibliotheken werden geladen (etwa 1,3 GB, nur einmal)…",
  "Ready. Restart EloGlobal to use the graphics card.": "Fertig. Starte EloGlobal neu, um die Grafikkarte zu nutzen.",
  "A part of EloGlobal is missing (uiautomation) - reinstall EloGlobal.": "Ein Teil von EloGlobal fehlt (uiautomation) - installiere EloGlobal neu.",
- "⚠ Screen OCR: a part of EloGlobal is missing (winrt) - reinstall EloGlobal.": "⚠ Bildschirm-OCR: Ein Teil von EloGlobal fehlt (winrt) - installiere EloGlobal neu."
+ "⚠ Screen OCR: a part of EloGlobal is missing (winrt) - reinstall EloGlobal.": "⚠ Bildschirm-OCR: Ein Teil von EloGlobal fehlt (winrt) - installiere EloGlobal neu.",
+ "Speak the translations (off: only show the text of who is talking)": "Übersetzungen sprechen (aus: nur den Text der Sprechenden zeigen)",
+ "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Aus: Die Übersetzungen werden nur als Text gezeigt (Untertitelfenster und Tab Live) und du hörst die Leute im Anruf mit ihrer eigenen Stimme.",
+ "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Aus: nur den Text der Sprechenden zeigen (Untertitel) - du hörst ihre eigene Stimme",
+ "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Nur Text: Die Übersetzungen erscheinen im Untertitelfenster und du hörst die Leute im Anruf mit ihrer eigenen Stimme. Namen: Tab Ausgang → Wer spricht."
 }

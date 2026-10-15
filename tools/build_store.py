@@ -6,6 +6,7 @@ Results (in dist\\):
   EloGlobal\                the app folder: EloGlobal.exe, main.py, eloglobal\, runtime\ (Python 3.13 + packages),
                             engines\espeak-ng, models\piper (English voice), licenses\, LICENSE, PRIVACY.md...
   steam\content\            the same folder, laid out as a Steam depot, + steam\scripts\*.vdf for SteamPipe
+  github\EloGlobal-<version>-windows-x64.zip   the same folder + update.json, for GitHub releases (--github)
   msix\layout\              the same folder + AppxManifest.xml + Images\ (MSIX package logos)
   msix\EloGlobal.msix       the package for Partner Center (unsigned: the Microsoft Store signs it)
 
@@ -322,11 +323,30 @@ def msix(app: Path, dist: Path, cache: Path, version: str):
     run([makeappx, "pack", "/d", layout, "/p", out / "EloGlobal.msix", "/o"])
 
 
+def github_zip(app: Path, dist: Path, repo: str, version: str) -> Path:
+    """The download for GitHub releases: the app folder + update.json (Settings -> Updates updates from `repo`).
+    The store builds have no update.json: their store updates them."""
+    log("GitHub release zip")
+    out = dist / "github"
+    rmtree(out)
+    out.mkdir(parents=True)
+    zpath = out / f"EloGlobal-{version}-windows-x64.zip"
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        for f in sorted(app.rglob("*")):
+            if f.is_file():
+                z.write(f, Path("EloGlobal") / f.relative_to(app))
+        z.writestr("EloGlobal/update.json", '{"repo": "%s"}\n' % repo)
+    print(f"   {zpath} ({zpath.stat().st_size / 1e6:.0f} MB)")
+    return zpath
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(ROOT / "dist"))
     ap.add_argument("--no-msix", action="store_true")
     ap.add_argument("--version", default="")
+    ap.add_argument("--github", default="Lagalizer/EloGlobal", metavar="OWNER/REPO",
+                    help="repository the GitHub zip updates from ('' = no GitHub zip)")
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT))
     from eloglobal import __version__
@@ -345,6 +365,8 @@ def main():
     size = sum(f.stat().st_size for f in app.rglob("*") if f.is_file())
     log(f"app folder ready: {app}  ({size / 1e6:.0f} MB)")
     steam_layout(app, dist)
+    if a.github:
+        github_zip(app, dist, a.github, __version__)
     if not a.no_msix:
         msix(app, dist, cache, version)
     log("done")

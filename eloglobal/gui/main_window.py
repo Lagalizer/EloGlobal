@@ -256,6 +256,9 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         g.addWidget(meter, 2, 0, 1, 3)
         en = self.bind(QCheckBox("Enabled"), f"{direction}.enabled")
         sp = self.bind(QCheckBox("Speak translation" if inc else "Speak into Discord"), f"{direction}.speak")
+        if inc:
+            sp.setToolTip("Off: only show the text of who is talking (subtitles) - you hear their own voices")
+            sp.clicked.connect(self._on_speak_clicked)
         row = QHBoxLayout()
         row.addWidget(en)
         row.addWidget(sp)
@@ -781,6 +784,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
             self.overlay.apply(self.colors, p["ui"])
         finally:
             self._loading = False
+        self._sync_text_only()
         self.dirty = False
         self._update_title()
 
@@ -815,6 +819,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         self.engine.apply_profile(copy.deepcopy(self.profile))
         self.overlay.apply(self.colors, self.profile["ui"])
         self._text_on_change()
+        self._sync_text_only()
         if self.profile["ui"].get("autosave_settings", True):
             self._autosave_timer.start()         # restarts while you keep changing things
         if self.engine.running:
@@ -1093,6 +1098,30 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
     def _on_hear_toggled(self, on: bool):
         if on != self.engine.hear_originals:
             self.engine.set_hear(on)
+
+    def _on_speak_clicked(self, on: bool):
+        """'Speak translation' off = text only: show the subtitles window (with the subtitles of the others)."""
+        if on:
+            return
+        for w, path in self.bindings:
+            if path == "incoming.show_subtitles" and not w.isChecked():
+                w.setChecked(True)
+        if not self.overlay.isVisible():
+            self.overlay.show()
+            for b in (getattr(self, "overlay_btn", None), getattr(self, "dash_subs_btn", None)):
+                if b is not None:
+                    b.blockSignals(True)
+                    b.setChecked(True)
+                    b.blockSignals(False)
+        self.setStatus("Text only: the translations are shown in the subtitles window and you hear the people "
+                       "in the call with their own voices. Names: Output tab → Who is talking.")
+
+    def _sync_text_only(self):
+        """Text only (translations not spoken): the people are always heard, so 'Hear people' has nothing to do."""
+        text_only = not self.profile["incoming"].get("speak", True)
+        for w in (getattr(self, "hear_btn", None), getattr(self, "dash_hear", None)):
+            if w is not None:
+                w.setEnabled(not text_only)
 
     def _show_hear(self, on: bool):
         for w in (getattr(self, "hear_btn", None), getattr(self, "dash_hear", None)):

@@ -1,6 +1,6 @@
 # EloGlobal - Privacy Policy
 
-*Last updated: 8 October 2026 · applies to EloGlobal 1.0 for Windows (Microsoft Store, Steam)*
+*Last updated: 15 October 2026 · applies to EloGlobal 1.0 for Windows (Microsoft Store, Steam, GitHub download)*
 
 EloGlobal is a voice and chat translator for voice calls that runs **entirely on your own computer**. This policy
 explains what the app does with your data and with the data of the people you talk to.
@@ -11,7 +11,8 @@ explains what the app does with your data and with the data of the people you ta
   voices run on your PC.
 - **We collect no personal data**: no account, no analytics, no telemetry, no advertising, no crash reports.
 - The app **only connects to the internet to download model files** (once) - and, if you turn on the optional
-  "Who is talking" feature, to log in to Discord with your own Discord application.
+  "Who is talking" feature, to log in to Discord with your own Discord application. The copy downloaded from
+  GitHub also asks GitHub for the newest version number (can be turned off).
 - Everything the app stores stays in `%LOCALAPPDATA%\EloGlobal` on your PC, and you can delete it at any time.
 
 ## What the app processes, and where
@@ -47,8 +48,13 @@ EloGlobal makes only these connections:
    the text to translate to the AI server *you* run on your computer or local network (Ollama, LM Studio). The app
    refuses addresses that are not on your computer or local network.
 
-The app has no updater of its own - updates come from the store you installed it from (Microsoft Store or Steam),
-under that store's privacy policy.
+4. **Updates - only the copy downloaded from GitHub**: when EloGlobal starts (*Settings → Updates → Check for
+   updates when EloGlobal starts*, can be turned off) or when you click *Check for updates*, the app asks GitHub
+   (`api.github.com`) for the newest release of EloGlobal, and downloads it from GitHub only when you click
+   *Update*. Nothing about you is sent; GitHub sees your IP address, as with any download.
+
+The copies from the Microsoft Store and Steam have no updater of their own - they are updated by that store, under
+the store's privacy policy.
 
 ## Children
 
@@ -68,4 +74,4 @@ If this policy changes, the new version will be published at this address with a
 ## Contact
 
 Questions about privacy: write to the support contact shown on EloGlobal's store page (Microsoft Store or
-Steam).
+Steam), or open an issue at github.com/Lagalizer/EloGlobal.

@@ -594,5 +594,9 @@
  "Downloading NVIDIA's libraries (about 1.3 GB, only once)…": "Download delle librerie NVIDIA (circa 1,3 GB, una sola volta)…",
  "Ready. Restart EloGlobal to use the graphics card.": "Pronto. Riavvia EloGlobal per usare la scheda grafica.",
  "A part of EloGlobal is missing (uiautomation) - reinstall EloGlobal.": "Manca una parte di EloGlobal (uiautomation) - reinstalla EloGlobal.",
- "⚠ Screen OCR: a part of EloGlobal is missing (winrt) - reinstall EloGlobal.": "⚠ OCR dello schermo: manca una parte di EloGlobal (winrt) - reinstalla EloGlobal."
+ "⚠ Screen OCR: a part of EloGlobal is missing (winrt) - reinstall EloGlobal.": "⚠ OCR dello schermo: manca una parte di EloGlobal (winrt) - reinstalla EloGlobal.",
+ "Speak the translations (off: only show the text of who is talking)": "Pronuncia le traduzioni (disattivato: mostra solo il testo di chi parla)",
+ "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Disattivato: le traduzioni sono mostrate solo come testo (finestra dei sottotitoli e scheda Dal vivo) e senti le persone della chiamata con la loro voce.",
+ "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Disattivato: mostra solo il testo di chi parla (sottotitoli) - senti la loro voce",
+ "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Solo testo: le traduzioni appaiono nella finestra dei sottotitoli e senti le persone della chiamata con la loro voce. Nomi: scheda Uscita → Chi sta parlando."
 }

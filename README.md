@@ -4,7 +4,16 @@
 in theirs. Everything runs on your own Windows PC: speech recognition, translation and voices. Nothing anyone says or
 writes is sent to the internet.
 
-This is the **store edition** (Microsoft Store and Steam). It grew out of Dizcord, the GitHub edition, and differs from
+## Download
+
+**[Latest release](https://github.com/Lagalizer/EloGlobal/releases/latest)** → `EloGlobal-<version>-windows-x64.zip`.
+Unzip it anywhere (e.g. `C:\Games\EloGlobal`) and run `EloGlobal.exe` - nothing to install, Python is included.
+Windows 10 2004 or newer, 64-bit. New versions: *Settings → Updates* downloads and installs them (your settings and
+models are kept).
+
+## About
+
+This is the **store edition** (Microsoft Store, Steam and the zip above). It grew out of Dizcord, the GitHub edition, and differs from
 it in four ways: it uses only engines that run on the PC, it ships as a ready folder with its own Python (nothing to
 install), it keeps user data in `%LOCALAPPDATA%\EloGlobal`, and it uses only components whose licences allow
 commercial distribution.
