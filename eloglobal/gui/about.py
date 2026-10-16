@@ -6,7 +6,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QTabWidget, QTextBrowser,
                                QVBoxLayout)
 
-from .. import APP_NAME, PRIVACY_URL, __version__, config
+from .. import APP_NAME, DONATE_URL, PRIVACY_URL, __version__, config, updater
 from ..i18n import no_translate
 
 PRIVACY_TEXT = (
@@ -105,6 +105,10 @@ class AboutDialog(QDialog):
         b = QPushButton("Full privacy policy")
         b.clicked.connect(_open_privacy_policy)
         row.addWidget(b)
+        if DONATE_URL and updater.repo():
+            b = QPushButton("♥ Donate")
+            b.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(DONATE_URL)))
+            row.addWidget(b)
         row.addStretch(1)
         close = QPushButton("Close")
         close.clicked.connect(self.accept)

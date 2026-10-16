@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QFontCom
                                QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
                                QWidget)
 
-from .. import APP_NAME, __version__, config, i18n, updater, voice_download
+from .. import APP_NAME, DONATE_URL, __version__, config, i18n, updater, voice_download
 from .widgets import DataCombo, DeviceCombo, VolumeSlider, run_async
 
 APPEARANCE_DEFAULTS = {
@@ -189,6 +189,10 @@ class SettingsTabMixin:
         b = QPushButton("About && licences")
         b.clicked.connect(lambda: self._show_about())
         row.addWidget(b)
+        if DONATE_URL and updater.repo():     # GitHub edition only: the stores have their own payment rules
+            b = QPushButton("♥ Donate")
+            b.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(DONATE_URL)))
+            row.addWidget(b)
         row.addStretch(1)
         bl.addLayout(row)
         v.addWidget(box)

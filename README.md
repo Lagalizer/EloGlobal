@@ -1,5 +1,7 @@
 # EloGlobal
 
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?logo=paypal&logoColor=white)](https://paypal.me/bmgpt)
+
 **Real-time voice and chat translator for voice calls - works with Discord.** Hear everyone in your language, speak
 in theirs. Everything runs on your own Windows PC: speech recognition, translation and voices. Nothing anyone says or
 writes is sent to the internet.
@@ -42,6 +44,9 @@ commercial distribution.
 EloGlobal itself is **not open source**: © Lagalizer, all rights reserved. It is free to download and use, but it
 may not be sold, copied, redistributed or modified - see [LICENSE](LICENSE). (1.0.0 and 1.0.1 were released under
 MIT.) The third-party components keep their own licences, listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Privacy policy: [PRIVACY.md](PRIVACY.md).
+
+**Like EloGlobal?** It's free - if it helps you, you can support it with a
+[donation on PayPal](https://paypal.me/bmgpt) (also the *♥ Donate* button in the GitHub edition: Settings, About).
 
 ## Development
 
