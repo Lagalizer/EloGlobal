@@ -602,5 +602,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Выкл.: переводы только показываются текстом (окно субтитров и вкладка «Эфир»), а людей в звонке вы слышите их собственными голосами.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Выкл.: только показывать текст говорящего (субтитры) - вы слышите их собственные голоса",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Только текст: переводы показываются в окне субтитров, а людей в звонке вы слышите их собственными голосами. Имена: вкладка «Выход» → «Кто говорит».",
- "♥ Donate": "♥ Поддержать"
+ "♥ Donate": "♥ Поддержать",
+ "Hotkey: repeat the last translation": "Клавиша: повторить последний перевод",
+ "Hotkey: lock / unlock their language": "Клавиша: закрепить / открепить их язык",
+ "↻ Repeat": "↻ Повторить",
+ "Say the last translation again (global hotkey: Input tab)": "Произнести последний перевод ещё раз (глобальная клавиша: вкладка «Вход»)",
+ "🔒 Their language": "🔒 Их язык",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Слушать язык, на котором они говорят, вместо «Определять автоматически» (распознавание быстрее, и ваши ответы идут на этом языке). Нажмите ещё раз, чтобы вернуться к «Определять автоматически». Глобальная клавиша: вкладка «Вход».",
+ "Their language: Auto-detect again.": "Их язык: снова «Определять автоматически».",
+ "No language heard from them yet - press again when they have spoken.": "Их язык ещё не услышан - нажмите ещё раз, когда они что-нибудь скажут.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "Их язык закреплён: {0} - распознавание речи быстрее. Нажмите ещё раз, чтобы вернуться к «Определять автоматически».",
+ "Repeat the last translation": "Повторить последний перевод",
+ "Lock / unlock the language they speak": "Закрепить / открепить язык, на котором они говорят",
+ "Nothing to repeat yet.": "Пока нечего повторять."
 }

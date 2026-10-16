@@ -163,7 +163,9 @@ class SettingsTabMixin:
                                 ("Translate text on screen (OCR)", "chat.hotkey_ocr", "ctrl+alt+o"),
                                 ("Show originals / translations in Discord", "chat.hotkey_inline", "ctrl+alt+i"),
                                 ("Push-to-talk (voice translator)", "input.ptt_key", "f8"),
-                                ("Hear the people in the call on / off", "input.hear_key", "f9")]:
+                                ("Hear the people in the call on / off", "input.hear_key", "f9"),
+                                ("Repeat the last translation", "input.repeat_key", "ctrl+alt+r"),
+                                ("Lock / unlock the language they speak", "input.lang_key", "ctrl+alt+l")]:
             e = self.bind(QLineEdit(), path)
             e.setPlaceholderText(f"e.g. {eg} - empty = off")
             f.addRow(label, e)

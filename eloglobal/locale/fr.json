@@ -597,5 +597,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Désactivé : les traductions sont seulement affichées en texte (fenêtre des sous-titres et onglet Direct) et vous entendez les personnes de l'appel avec leur propre voix.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Désactivé : afficher seulement le texte de qui parle (sous-titres) - vous entendez leur propre voix",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Texte seulement : les traductions s'affichent dans la fenêtre des sous-titres et vous entendez les personnes de l'appel avec leur propre voix. Noms : onglet Sortie → Qui parle.",
- "♥ Donate": "♥ Faire un don"
+ "♥ Donate": "♥ Faire un don",
+ "Hotkey: repeat the last translation": "Raccourci : répéter la dernière traduction",
+ "Hotkey: lock / unlock their language": "Raccourci : fixer / libérer leur langue",
+ "↻ Repeat": "↻ Répéter",
+ "Say the last translation again (global hotkey: Input tab)": "Redire la dernière traduction (raccourci global : onglet Entrée)",
+ "🔒 Their language": "🔒 Leur langue",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Écouter dans la langue qu'ils parlent au lieu de Détection automatique (reconnaissance plus rapide, et vos réponses vont dans cette langue). Appuyez à nouveau pour Détection automatique. Raccourci global : onglet Entrée.",
+ "Their language: Auto-detect again.": "Leur langue : de nouveau Détection automatique.",
+ "No language heard from them yet - press again when they have spoken.": "Aucune langue entendue de leur part pour l'instant - appuyez à nouveau quand ils auront parlé.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "Leur langue est fixée : {0} - la reconnaissance vocale est plus rapide. Appuyez à nouveau pour Détection automatique.",
+ "Repeat the last translation": "Répéter la dernière traduction",
+ "Lock / unlock the language they speak": "Fixer / libérer la langue qu'ils parlent",
+ "Nothing to repeat yet.": "Rien à répéter pour l'instant."
 }

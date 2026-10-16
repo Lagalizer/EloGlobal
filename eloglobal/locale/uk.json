@@ -602,5 +602,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Вимк.: переклади лише показуються текстом (вікно субтитрів і вкладка «Ефір»), а людей у дзвінку ви чуєте їхніми власними голосами.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Вимк.: лише показувати текст того, хто говорить (субтитри) - ви чуєте їхні власні голоси",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Лише текст: переклади показуються у вікні субтитрів, а людей у дзвінку ви чуєте їхніми власними голосами. Імена: вкладка «Вихід» → «Хто говорить».",
- "♥ Donate": "♥ Підтримати"
+ "♥ Donate": "♥ Підтримати",
+ "Hotkey: repeat the last translation": "Клавіша: повторити останній переклад",
+ "Hotkey: lock / unlock their language": "Клавіша: закріпити / відкріпити їхню мову",
+ "↻ Repeat": "↻ Повторити",
+ "Say the last translation again (global hotkey: Input tab)": "Промовити останній переклад ще раз (глобальна клавіша: вкладка «Вхід»)",
+ "🔒 Their language": "🔒 Їхня мова",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Слухати мову, якою вони говорять, замість «Визначати автоматично» (розпізнавання швидше, і ваші відповіді йдуть цією мовою). Натисніть ще раз, щоб повернутися до «Визначати автоматично». Глобальна клавіша: вкладка «Вхід».",
+ "Their language: Auto-detect again.": "Їхня мова: знову «Визначати автоматично».",
+ "No language heard from them yet - press again when they have spoken.": "Їхню мову ще не почуто - натисніть ще раз, коли вони щось скажуть.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "Їхню мову закріплено: {0} - розпізнавання мовлення швидше. Натисніть ще раз, щоб повернутися до «Визначати автоматично».",
+ "Repeat the last translation": "Повторити останній переклад",
+ "Lock / unlock the language they speak": "Закріпити / відкріпити мову, якою вони говорять",
+ "Nothing to repeat yet.": "Поки нічого повторювати."
 }

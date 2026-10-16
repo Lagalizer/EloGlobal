@@ -118,6 +118,8 @@ def default_profile() -> dict:
             "mic_mode": "vad",             # vad | ptt | toggle
             "ptt_key": "f8",
             "hear_key": "f9",              # toggles hearing the people in the call (their original voices)
+            "repeat_key": "ctrl+alt+r",    # say the last translation again
+            "lang_key": "ctrl+alt+l",      # lock "they speak" to the language heard from them / back to auto
             "listen_vad": {"auto": True, "threshold_db": -45.0, "silence_ms": 550, "min_speech_ms": 350,
                            "max_utterance_s": 12.0, "pre_roll_ms": 300},
             "mic_vad": {"auto": True, "threshold_db": -42.0, "silence_ms": 500, "min_speech_ms": 300,

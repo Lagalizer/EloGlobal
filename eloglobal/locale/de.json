@@ -600,5 +600,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Aus: Die Übersetzungen werden nur als Text gezeigt (Untertitelfenster und Tab Live) und du hörst die Leute im Anruf mit ihrer eigenen Stimme.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Aus: nur den Text der Sprechenden zeigen (Untertitel) - du hörst ihre eigene Stimme",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Nur Text: Die Übersetzungen erscheinen im Untertitelfenster und du hörst die Leute im Anruf mit ihrer eigenen Stimme. Namen: Tab Ausgang → Wer spricht.",
- "♥ Donate": "♥ Spenden"
+ "♥ Donate": "♥ Spenden",
+ "Hotkey: repeat the last translation": "Taste: letzte Übersetzung wiederholen",
+ "Hotkey: lock / unlock their language": "Taste: ihre Sprache festlegen / lösen",
+ "↻ Repeat": "↻ Wiederholen",
+ "Say the last translation again (global hotkey: Input tab)": "Die letzte Übersetzung noch einmal sagen (globale Taste: Tab Eingang)",
+ "🔒 Their language": "🔒 Ihre Sprache",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Auf die Sprache hören, die sie sprechen, statt Automatisch erkennen (schnellere Erkennung, und deine Antworten gehen in diese Sprache). Erneut drücken für Automatisch erkennen. Globale Taste: Tab Eingang.",
+ "Their language: Auto-detect again.": "Ihre Sprache: wieder Automatisch erkennen.",
+ "No language heard from them yet - press again when they have spoken.": "Noch keine Sprache von ihnen gehört - drücke erneut, wenn sie gesprochen haben.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "Ihre Sprache festgelegt: {0} - die Spracherkennung ist schneller. Erneut drücken für Automatisch erkennen.",
+ "Repeat the last translation": "Letzte Übersetzung wiederholen",
+ "Lock / unlock the language they speak": "Die Sprache, die sie sprechen, festlegen / lösen",
+ "Nothing to repeat yet.": "Noch nichts zu wiederholen."
 }

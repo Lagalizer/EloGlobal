@@ -599,5 +599,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Disattivato: le traduzioni sono mostrate solo come testo (finestra dei sottotitoli e scheda Dal vivo) e senti le persone della chiamata con la loro voce.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Disattivato: mostra solo il testo di chi parla (sottotitoli) - senti la loro voce",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Solo testo: le traduzioni appaiono nella finestra dei sottotitoli e senti le persone della chiamata con la loro voce. Nomi: scheda Uscita → Chi sta parlando.",
- "♥ Donate": "♥ Dona"
+ "♥ Donate": "♥ Dona",
+ "Hotkey: repeat the last translation": "Tasto: ripeti l'ultima traduzione",
+ "Hotkey: lock / unlock their language": "Tasto: blocca / sblocca la loro lingua",
+ "↻ Repeat": "↻ Ripeti",
+ "Say the last translation again (global hotkey: Input tab)": "Ripeti l'ultima traduzione (tasto globale: scheda Ingresso)",
+ "🔒 Their language": "🔒 La loro lingua",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Ascolta nella lingua che parlano invece di Rilevamento automatico (riconoscimento più veloce, e le tue risposte vanno in quella lingua). Premi di nuovo per Rilevamento automatico. Tasto globale: scheda Ingresso.",
+ "Their language: Auto-detect again.": "La loro lingua: di nuovo Rilevamento automatico.",
+ "No language heard from them yet - press again when they have spoken.": "Nessuna lingua sentita da loro finora - premi di nuovo quando avranno parlato.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "La loro lingua è bloccata: {0} - il riconoscimento vocale è più veloce. Premi di nuovo per Rilevamento automatico.",
+ "Repeat the last translation": "Ripeti l'ultima traduzione",
+ "Lock / unlock the language they speak": "Blocca / sblocca la lingua che parlano",
+ "Nothing to repeat yet.": "Ancora niente da ripetere."
 }

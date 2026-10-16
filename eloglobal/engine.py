@@ -364,6 +364,8 @@ class Pipeline:
             return              # Stop was pressed while this was translated: don't speak (or reopen the audio)
 
         eng.add_history(who or ("Them" if self.dir == "incoming" else "Me"), text, translated)
+        if self.dir == "incoming" and not skipped and not typed:
+            eng.last_heard = (translated, target, who)
         speak = bool(self.cfg.get("speak", True)) and not (skipped and self.dir == "incoming"
                                                            and self.cfg.get("skip_same_language", True))
         line_id = eng.next_line_id()
@@ -391,6 +393,7 @@ class Engine(TextEngine):
         self.pipelines: dict[str, Pipeline] = {}
         self.speakers: dict[str, Speaker] = {}
         self.their_language: str | None = None
+        self.last_heard: tuple[str, str, str] | None = None   # (translation, language, who) - for "Repeat"
         self.running = False
         self.paused_incoming = False
         self.muted_outgoing = False
@@ -799,6 +802,15 @@ class Engine(TextEngine):
             pl.segmenter.set_ptt(down)
             self.emit({"type": "ptt", "down": pl.segmenter.ptt_down})
 
+    def repeat_last(self):
+        """Say the last translation of the others again, in your headphones (hotkey / Repeat button)."""
+        last = self.last_heard
+        if not last:
+            self.emit_status("Nothing to repeat yet.")
+            return
+        text, lang, who = last
+        self.speaker("incoming").say(Utterance(text, lang, kind="voice", who=who))
+
     def stop_speaking(self):
         for sp in self.speakers.values():
             sp.cancel()
@@ -819,6 +831,16 @@ class Engine(TextEngine):
                     hear, lambda: threading.Thread(target=self.toggle_hear, daemon=True).start())))
             except Exception as e:
                 self.emit_error(f"Could not register hotkey '{hear}': {e}")
+        # repeat the last translation; lock / unlock their language (the window changes the languages)
+        for name, action in (("repeat_key", self.repeat_last), ("lang_key", lambda: self.emit({"type": "lang_key"}))):
+            combo = (self.profile["input"].get(name) or "").strip()
+            if not combo:
+                continue
+            try:
+                self._hotkey_hooks.append(("hotkey", keyboard.add_hotkey(
+                    combo, lambda fn=action: threading.Thread(target=fn, daemon=True).start())))
+            except Exception as e:
+                self.emit_error(f"Could not register hotkey '{combo}': {e}")
         key = (self.profile["input"].get("ptt_key") or "").strip()
         if self.profile["input"]["mic_mode"] not in ("ptt", "toggle") or not key:
             return

@@ -259,7 +259,9 @@ class DashboardMixin:
                 ("Show originals / translations", ch.get("hotkey_inline")),
                 ("Start / stop voice translator (in the app)", "F5"),
                 ("Push-to-talk (voice, PTT mode)", inp.get("ptt_key")),
-                ("Hear the people in the call on / off", inp.get("hear_key"))]
+                ("Hear the people in the call on / off", inp.get("hear_key")),
+                ("Repeat the last translation", inp.get("repeat_key")),
+                ("Lock / unlock the language they speak", inp.get("lang_key"))]
         rows = "".join(f"<tr><td style='padding-right:10px'><b>{html.escape((k or '-').upper())}</b></td>"
                        f"<td style='color:{c['muted']}'>{html.escape(tr(label))}</td></tr>" for label, k in keys)
         self.dash_hotkeys.setText(f"<table>{rows}</table>")

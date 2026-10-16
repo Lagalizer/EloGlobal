@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QFileDia
 
 from .. import APP_NAME, __version__, config
 from .. import languages as L
-from ..i18n import no_translate
+from ..i18n import no_translate, tr
 from ..audio import devices
 from ..engine import Engine
 from ..speech import NAME_STYLES
@@ -139,6 +139,8 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         self._meter_timer.start(80)
         self._last_level = {"incoming": 0.0, "outgoing": 0.0}
         self.setStatus("Ready. Pick a profile and press Start.")
+        if getattr(self, "_early_status", None):          # a problem found while the window was being built
+            self.setStatus(*self._early_status)
         if self.state.get("overlay_visible"):
             self.overlay.show()
         if not self.state.get("seen_setup"):
@@ -282,12 +284,24 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
             self.hear_btn.setToolTip("Also hear the people in the call (their own voices), not only the "
                                      "translations. Global hotkey: Input tab (default F9).")
             self.hear_btn.toggled.connect(self._on_hear_toggled)
+            again = QPushButton("↻ Repeat")
+            again.setToolTip("Say the last translation again (global hotkey: Input tab)")
+            again.clicked.connect(self.engine.repeat_last)
+            lock = QPushButton("🔒 Their language")
+            lock.setToolTip("Listen for the language they speak instead of Auto-detect (faster recognition, and "
+                            "your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.")
+            lock.clicked.connect(self.toggle_their_language)
             r2 = QHBoxLayout()
             r2.addWidget(pause)
             r2.addWidget(stop)
             r2.addWidget(self.hear_btn)
             r2.addStretch(1)
             g.addLayout(r2, 4, 0, 1, 3)
+            r3 = QHBoxLayout()
+            r3.addWidget(again)
+            r3.addWidget(lock)
+            r3.addStretch(1)
+            g.addLayout(r3, 5, 0, 1, 3)
         else:
             self.out_src, self.out_tgt, self.out_meter, self.out_stage = src, tgt, meter, stage
             follow = self.bind(QCheckBox("Reply in the language they speak"), "outgoing.follow_their_language")
@@ -389,6 +403,12 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         hk = self.bind(QLineEdit(), "input.hear_key")
         hk.setPlaceholderText("e.g. f9, ctrl+alt+h - empty = off")
         f.addRow("Hotkey: hear the people on / off", hk)
+        rk = self.bind(QLineEdit(), "input.repeat_key")
+        rk.setPlaceholderText("e.g. ctrl+alt+r - empty = off")
+        f.addRow("Hotkey: repeat the last translation", rk)
+        lk = self.bind(QLineEdit(), "input.lang_key")
+        lk.setPlaceholderText("e.g. ctrl+alt+l - empty = off")
+        f.addRow("Hotkey: lock / unlock their language", lk)
         f.addRow(self.bind(QCheckBox("Hear the people in the call when EloGlobal starts (not only the translations)"),
                            "incoming.hear_originals"))
         v.addWidget(box)
@@ -825,7 +845,8 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
             self._autosave_timer.start()         # restarts while you keep changing things
         if self.engine.running:
             restart_keys = [("input", k) for k in ("listen_mode", "listen_device", "mic_device", "mic_mode",
-                                                   "ptt_key", "hear_key", "listen_app")]
+                                                   "ptt_key", "hear_key", "repeat_key", "lang_key",
+                                                   "listen_app")]
             restart_keys += [("incoming", "enabled"), ("outgoing", "enabled"), ("incoming", "passthrough")]
             if any(before[a].get(b) != self.profile[a].get(b) for a, b in restart_keys):
                 self.restart_hint.show()
@@ -999,6 +1020,8 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
                 self.restart_hint.hide()
         elif t == "their_lang":
             self.their_label.setText(f"They speak: {L.name(ev['lang'])}")
+        elif t == "lang_key":
+            self.toggle_their_language()
         elif t == "hear":
             self._show_hear(ev["on"])
         elif t == "rpc_status":
@@ -1010,6 +1033,33 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
             self.ptt_btn.setText("🔴 Recording…" if ev["down"] else "🎤 Hold to talk")
         elif t == "log":
             self.log_view.appendPlainText(ev["text"])
+
+    def toggle_their_language(self):
+        """'They speak' Auto-detect -> the language heard from them (recognition is faster and your replies go to
+        it); again -> back to Auto-detect, e.g. when you join another group. Hotkey input.lang_key."""
+        if self.profile["incoming"]["source_lang"] != L.AUTO:
+            self._set_paths({"incoming.source_lang": L.AUTO})
+            self.setStatus("Their language: Auto-detect again.")
+            return
+        lang = self.engine.their_language
+        if not lang or self.in_src.findData(lang) < 0:
+            self.setStatus("No language heard from them yet - press again when they have spoken.")
+            return
+        self._set_paths({"incoming.source_lang": lang, "outgoing.target_lang": lang})
+        self.setStatus(f"Their language locked: {tr(L.name(lang))} - speech recognition is faster. Press again "
+                       "for Auto-detect.")
+
+    def _set_paths(self, values: dict):
+        """Change settings as if the user had picked them: every widget showing them, the profile, the engine."""
+        self._loading = True
+        try:
+            for w, path in self.bindings:
+                if path in values:
+                    set_widget_value(w, values[path])
+        finally:
+            self._loading = False
+        self._changed_widget = None
+        self.on_change()
 
     def _decay_meters(self):
         now = time.monotonic()
@@ -1405,6 +1455,9 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         self.overlay_btn.blockSignals(False)
 
     def setStatus(self, text, error=False):
+        if not hasattr(self, "status_label"):              # still building the window (e.g. a mistyped hotkey):
+            self._early_status = (text, error)             # shown once the window is ready instead of lost
+            return
         self.status_label.setText(text)
         self.status_label.setObjectName("warn" if error else "")
         self.status_label.style().unpolish(self.status_label)

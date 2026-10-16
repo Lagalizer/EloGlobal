@@ -600,5 +600,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Wył.: tłumaczenia są pokazywane tylko jako tekst (okno napisów i karta Na żywo), a osoby w rozmowie słyszysz ich własnymi głosami.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Wył.: tylko pokazuj tekst osoby, która mówi (napisy) - słyszysz ich własne głosy",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Tylko tekst: tłumaczenia są pokazywane w oknie napisów, a osoby w rozmowie słyszysz ich własnymi głosami. Imiona: karta Wyjście → Kto mówi.",
- "♥ Donate": "♥ Wesprzyj"
+ "♥ Donate": "♥ Wesprzyj",
+ "Hotkey: repeat the last translation": "Skrót: powtórz ostatnie tłumaczenie",
+ "Hotkey: lock / unlock their language": "Skrót: zablokuj / odblokuj ich język",
+ "↻ Repeat": "↻ Powtórz",
+ "Say the last translation again (global hotkey: Input tab)": "Powiedz ostatnie tłumaczenie jeszcze raz (skrót globalny: karta Wejście)",
+ "🔒 Their language": "🔒 Ich język",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Słuchaj w języku, którym mówią, zamiast Wykrywaj automatycznie (szybsze rozpoznawanie, a twoje odpowiedzi idą w tym języku). Naciśnij ponownie, aby wrócić do Wykrywaj automatycznie. Skrót globalny: karta Wejście.",
+ "Their language: Auto-detect again.": "Ich język: znowu Wykrywaj automatycznie.",
+ "No language heard from them yet - press again when they have spoken.": "Nie usłyszano jeszcze ich języka - naciśnij ponownie, gdy coś powiedzą.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "Ich język zablokowany: {0} - rozpoznawanie mowy jest szybsze. Naciśnij ponownie, aby wrócić do Wykrywaj automatycznie.",
+ "Repeat the last translation": "Powtórz ostatnie tłumaczenie",
+ "Lock / unlock the language they speak": "Zablokuj / odblokuj język, którym mówią",
+ "Nothing to repeat yet.": "Na razie nie ma czego powtórzyć."
 }

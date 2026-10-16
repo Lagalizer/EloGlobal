@@ -34,6 +34,8 @@ INDEX = DIR / "index.json"                       # pair -> chosen release (so a 
 _TOKENS = {"pt": ("pob", "por"), "pt-PT": ("por",), "zh": ("cmn_Hans", "zho_Hans", "cmn"),
            "zh-TW": ("cmn_Hant", "zho_Hant", "cmn"), "sr": ("srp_Cyrl", "srp_Latn"), "no": ("nob", "nno")}
 _SENT = re.compile(r"(?<=[.!?。！？])\s+")
+NO_MODEL_RECHECK_S = 7 * 86400                   # a pair without a model is looked up again after a week
+_NO_SPACES = ("zh", "ja")                        # languages that don't put a space between sentences
 
 
 class OpusError(Exception):
@@ -105,8 +107,12 @@ def _rank(key: str, best: bool) -> tuple:
 def find_release(src3: str, tgt3: str, best: bool = False) -> tuple[str, int] | None:
     idx = _index()
     k = f"{src3}-{tgt3}{'+best' if best else ''}"
-    if k in idx:
-        return tuple(idx[k]) if idx[k] else None
+    hit = idx.get(k)
+    if isinstance(hit, list):
+        return tuple(hit)
+    if isinstance(hit, dict) and time.time() - hit.get("none_since", 0) < NO_MODEL_RECHECK_S:
+        return None
+    # never asked, or "no model" more than a week ago: new models are published over time, so ask again
     try:
         rel = _list_releases(src3, tgt3)
     except Exception as e:  # noqa: BLE001
@@ -114,7 +120,7 @@ def find_release(src3: str, tgt3: str, best: bool = False) -> tuple[str, int] | 
     pick = sorted(rel, key=lambda r: _rank(r[0], best))[0] if rel else None
     with _index_lock:                       # several pairs can be looked up at once
         idx = _index()
-        idx[k] = list(pick) if pick else None
+        idx[k] = list(pick) if pick else {"none_since": time.time()}
         _save_index(idx)
     return pick
 
@@ -250,7 +256,8 @@ class Translator:
         for i, (a, b) in enumerate(hops):
             target = tgt if i == len(hops) - 1 else "en"
             sentences = self.model(a, b, device, on_status).translate(sentences, target, beam)
-        return " ".join(s.strip() for s in sentences if s.strip())
+        sep = "" if L.base(tgt) in _NO_SPACES else " "
+        return sep.join(s.strip() for s in sentences if s.strip())
 
 
 TRANSLATOR = Translator()

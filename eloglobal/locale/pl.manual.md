@@ -100,6 +100,11 @@ cię, jeśli Discord używa twojego prawdziwego mikrofonu zamiast kabla.
 mikserze głośności Windows i oddaje mu głośność, gdy naciśniesz Stop. Naciśnij F9 albo przycisk Słysz ludzi, aby
 słyszeć też ich własne głosy. Klawisz możesz zmienić na karcie Wejście.
 
+**Coś ci umknęło? Ctrl+Alt+R** mówi ostatnie tłumaczenie jeszcze raz, w twoich słuchawkach. **Ctrl+Alt+L** ustawia
+język, którym mówią, na ten, który aplikacja właśnie usłyszała: rozpoznawanie jest szybsze, a twoje odpowiedzi idą
+w tym języku. Naciśnij ponownie, aby wrócić do Wykrywaj automatycznie, gdy dołączysz do innej grupy. Oba klawisze
+zmienisz na karcie Wejście, a karta Na żywo ma też do nich przyciski.
+
 **Jeden głos, po kolei.** Tłumaczenia z rozmowy i czytane na głos wiadomości z czatu mają jeden głos, więc nigdy
 nie mówią jednocześnie. Wszystko jest mówione w kolejności, w jakiej zostało powiedziane, i nic nie jest pomijane:
 następne zdanie przygotowuje się, gdy gra obecne, a gdy zdania się piętrzą, głos mówi trochę szybciej.

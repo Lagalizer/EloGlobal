@@ -99,6 +99,11 @@ mikrofonunu kullanırsa uygulama seni uyarır.
 Windows ses karıştırıcısında kısar ve Durdur'a bastığında sesini geri verir. Onların kendi seslerini de duymak için
 F9'a ya da İnsanları duy düğmesine bas. Tuşu Giriş sekmesinden değiştirebilirsin.
 
+**Bir şey mi kaçırdın? Ctrl+Alt+R** son çeviriyi kulaklığında yeniden söyler. **Ctrl+Alt+L** onların konuştuğu dili
+uygulamanın az önce duyduğu dile sabitler: tanıma hızlanır ve cevapların o dile gider. Başka bir gruba katıldığında
+Otomatik algıla'ya dönmek için tekrar bas. İki tuşu da Giriş sekmesinden değiştirebilirsin; Canlı sekmesinde onlar
+için düğmeler de var.
+
 **Tek ses, sırayla.** Görüşme çevirileri ve sesli okunan sohbet mesajları tek bir sesi paylaşır, bu yüzden asla
 birbirinin üstüne konuşmaz. Her şey söylendiği sırayla söylenir ve hiçbir şey atlanmaz: şu anki cümle çalarken
 sonraki hazırlanır, cümleler birikince ses biraz daha hızlı konuşur.

@@ -602,5 +602,17 @@
  "Off: the translations are only shown as text (subtitles window and Live tab) and you hear the people in the call with their own voices.": "Kapalı: çeviriler yalnızca metin olarak gösterilir (altyazı penceresi ve Canlı sekmesi) ve görüşmedeki kişileri kendi sesleriyle duyarsınız.",
  "Off: only show the text of who is talking (subtitles) - you hear their own voices": "Kapalı: yalnızca konuşanın metnini göster (altyazı) - onları kendi sesleriyle duyarsınız",
  "Text only: the translations are shown in the subtitles window and you hear the people in the call with their own voices. Names: Output tab → Who is talking.": "Yalnızca metin: çeviriler altyazı penceresinde gösterilir ve görüşmedeki kişileri kendi sesleriyle duyarsınız. İsimler: Çıkış sekmesi → Kim konuşuyor.",
- "♥ Donate": "♥ Bağış yap"
+ "♥ Donate": "♥ Bağış yap",
+ "Hotkey: repeat the last translation": "Kısayol: son çeviriyi tekrarla",
+ "Hotkey: lock / unlock their language": "Kısayol: onların dilini sabitle / serbest bırak",
+ "↻ Repeat": "↻ Tekrarla",
+ "Say the last translation again (global hotkey: Input tab)": "Son çeviriyi yeniden söyle (genel kısayol: Giriş sekmesi)",
+ "🔒 Their language": "🔒 Onların dili",
+ "Listen for the language they speak instead of Auto-detect (faster recognition, and your replies go to it). Press again for Auto-detect. Global hotkey: Input tab.": "Otomatik algıla yerine onların konuştuğu dili dinle (daha hızlı tanıma, ve cevapların o dile gider). Otomatik algıla için tekrar bas. Genel kısayol: Giriş sekmesi.",
+ "Their language: Auto-detect again.": "Onların dili: yeniden Otomatik algıla.",
+ "No language heard from them yet - press again when they have spoken.": "Henüz onlardan bir dil duyulmadı - konuştuklarında tekrar bas.",
+ "Their language locked: {0} - speech recognition is faster. Press again for Auto-detect.": "Onların dili sabitlendi: {0} - konuşma tanıma daha hızlı. Otomatik algıla için tekrar bas.",
+ "Repeat the last translation": "Son çeviriyi tekrarla",
+ "Lock / unlock the language they speak": "Onların konuştuğu dili sabitle / serbest bırak",
+ "Nothing to repeat yet.": "Henüz tekrarlanacak bir şey yok."
 }

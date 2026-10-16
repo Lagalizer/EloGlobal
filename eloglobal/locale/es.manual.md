@@ -101,6 +101,11 @@ tu micrófono real en lugar del cable.
 baja Discord en el mezclador de volumen de Windows y le devuelve el volumen cuando pulsas Detener. Pulsa F9, o el
 botón Oír a las personas, para oír también sus propias voces. Puedes cambiar la tecla en la pestaña Entrada.
 
+**¿Te perdiste algo? Ctrl+Alt+R** dice otra vez la última traducción, en tus auriculares. **Ctrl+Alt+L** fija el
+idioma que hablan en el que la app acaba de oír: el reconocimiento es más rápido, y tus respuestas van a ese
+idioma. Pulsa otra vez para volver a Detectar automáticamente cuando entres en otro grupo. Puedes cambiar las dos
+teclas en la pestaña Entrada, y la pestaña En directo también tiene botones para ellas.
+
 **Una sola voz, en orden.** Las traducciones de la llamada y los mensajes del chat leídos en voz alta comparten una
 sola voz, así que nunca se pisan. Todo se dice en el orden en que se habló y no se salta nada: la siguiente frase
 se prepara mientras suena la actual, y cuando se acumulan frases la voz habla un poco más rápido.

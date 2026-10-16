@@ -27,7 +27,8 @@ commercial distribution.
 - **They hear you in theirs** - your microphone is translated and spoken into Discord through a virtual cable
   ([VB-Audio Virtual Cable](https://vb-audio.com/Cable/), installed by the user - not included).
 - **One app voice** - call translations and chat messages share one queue, never overlap, catch up when they pile up;
-  optional "who is talking" names through Discord's local RPC.
+  optional "who is talking" names through Discord's local RPC. Missed something? **Ctrl+Alt+R** repeats the last
+  translation; **Ctrl+Alt+L** locks the language they speak (faster recognition).
 - **Text** - Discord chat translated inside Discord (Windows UI Automation), select-to-translate, screen OCR, write
   in their language.
 - **10 UI languages**, guided tour and a manual read aloud by a voice of the PC.

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Repeat** (Ctrl+Alt+R, or ↻ Repeat on the Live tab): says the last translation of the others again, in your
+  headphones - for when you missed it.
+- **Their language** (Ctrl+Alt+L, or 🔒 Their language on the Live tab): sets *Listen for* to the language just heard
+  from them instead of Auto-detect (recognition gets about twice as fast) and *They hear* to the same language; press
+  again for Auto-detect when you join another group. Both keys: Input tab, Settings → Hotkeys; shown on the
+  Dashboard; described in the Manual; translated into the 9 other app languages.
 - **Licence**: EloGlobal is no longer MIT. The new LICENSE (EloGlobal Licence) keeps all rights with Lagalizer: free
   to download and use, but no selling, copying, redistributing or modifying without written permission. Third-party
   components keep their own licences. 1.0.0 and 1.0.1 remain MIT. About window text updated in all 10 languages.
@@ -14,7 +20,9 @@
   downloads could leave a broken voice file, and up to 4 parallel 280 MB downloads); a damaged profile file no longer
   stops EloGlobal from starting (kept as .broken); the chat reader no longer keeps every message element it read;
   windows saved on a monitor that was unplugged open on screen again; Screen-text watch skips a turn while the last
-  one is still running.
+  one is still running; an error found while the window opens (e.g. a mistyped hotkey) is shown instead of lost;
+  OPUS-MT no longer puts spaces between Chinese / Japanese sentences, and a language pair that had no model is
+  looked up again after a week.
 - **Safer**: updates are checked against GitHub's SHA-256 checksum, NVIDIA libraries against PyPI's; local AI requests refuse redirects and proxies;
   settings, secrets and the Discord-volume file are written atomically.
 
