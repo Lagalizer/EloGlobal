@@ -10,6 +10,7 @@ portable.txt are never touched), and starts EloGlobal again.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -40,6 +41,7 @@ class Release:
     asset_name: str
     size: int
     newer: bool
+    sha256: str = ""         # from GitHub's asset digest ("sha256:…"); empty for releases made before GitHub had it
 
 
 def repo() -> str:
@@ -71,20 +73,34 @@ def check() -> Release:
     if asset is None:
         raise RuntimeError(f"The release {tag} has no Windows zip yet - try again later.")
     version = parse_version(tag)
+    digest = asset.get("digest") or ""
+    sha256 = digest[7:].lower() if digest.lower().startswith("sha256:") else ""
     return Release(tag, version, data.get("body") or "", asset["browser_download_url"], asset["name"],
-                   int(asset.get("size") or 0), bool(version) and version > parse_version(__version__))
+                   int(asset.get("size") or 0), bool(version) and version > parse_version(__version__), sha256)
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
 
 
 def download(rel: Release, progress=None, cancelled=lambda: False) -> Path:
     """Download and unpack the release; returns the new app folder (with EloGlobal.exe) in the data folder."""
     STAGE.mkdir(parents=True, exist_ok=True)
-    for old in STAGE.glob("*.zip"):
-        if old.name != rel.asset_name:
+    keep = {rel.asset_name, rel.asset_name + ".part"}      # a .part of this release resumes; older ones go
+    for old in [*STAGE.glob("*.zip"), *STAGE.glob("*.zip.part")]:
+        if old.name not in keep:
             old.unlink(missing_ok=True)
     zpath = fetch(rel.asset_url, STAGE / rel.asset_name, progress, cancelled)
     if rel.size and zpath.stat().st_size != rel.size:
         zpath.unlink(missing_ok=True)
         raise OSError("the download is incomplete - try again")
+    if rel.sha256 and _sha256(zpath) != rel.sha256:
+        zpath.unlink(missing_ok=True)
+        raise OSError("the download doesn't match the release (checksum differs) - try again")
     new = STAGE / "new"
     shutil.rmtree(new, ignore_errors=True)
     with zipfile.ZipFile(zpath) as z:

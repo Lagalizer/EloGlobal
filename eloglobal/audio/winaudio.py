@@ -579,8 +579,10 @@ class AppVolume:
             return
         try:
             data = self._orig if data is None else data
-            if data:
-                self.restore_file.write_text(json.dumps(data), encoding="utf-8")
+            if data:      # written atomically: this file is what gives Discord its volume back after a crash
+                tmp = self.restore_file.with_name(self.restore_file.name + ".tmp")
+                tmp.write_text(json.dumps(data), encoding="utf-8")
+                os.replace(tmp, self.restore_file)
             elif self.restore_file.exists():
                 self.restore_file.unlink()
         except Exception as e:  # noqa: BLE001

@@ -1,4 +1,4 @@
-"""Paths, profiles (save/load) and the small store for the one secret the app keeps.
+r"""Paths, profiles (save/load) and the small store for the one secret the app keeps.
 
 Where things live:
 - ROOT           the app folder. Read-only when installed from a store (MSIX / Steam): only program files, the
@@ -254,13 +254,18 @@ def load_profile(name: str) -> dict:
     return prof
 
 
+def write_atomic(path: Path, text: str) -> None:
+    """Write a file so that a crash or power cut leaves either the old or the new content, never half of it."""
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def save_profile(profile: dict, name: str | None = None) -> Path:
     if name:
         profile["name"] = name
     p = profile_path(profile["name"])
-    tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(profile, indent=2, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, p)
+    write_atomic(p, json.dumps(profile, indent=2, ensure_ascii=False))
     return p
 
 
@@ -315,7 +320,7 @@ def load_app_state() -> dict:
 
 
 def save_app_state(state: dict) -> None:
-    APP_STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    write_atomic(APP_STATE_FILE, json.dumps(state, indent=2))
 
 
 # --------------------------------------------------------------------------- secrets
@@ -378,4 +383,4 @@ class KeyStore:
     def save(self) -> None:
         with self._lock:
             blob = _dpapi(json.dumps(self._keys).encode("utf-8"), True)
-            self.path.write_text(json.dumps({"dpapi": base64.b64encode(blob).decode("ascii")}), encoding="utf-8")
+            write_atomic(self.path, json.dumps({"dpapi": base64.b64encode(blob).decode("ascii")}))

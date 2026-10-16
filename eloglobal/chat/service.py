@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import collections
 import concurrent.futures
+import contextlib
 import ctypes
 import logging
 import queue
@@ -74,6 +75,8 @@ class ChatService:
         self.discord_hwnd = None
         self._clip_seq = None
         self._clip_thread = None
+        self._clip_gen = 0                         # bumped on every start/stop: an older clipboard watcher exits
+        self._clip_lock = threading.RLock()        # held while the app itself uses the clipboard
         self._translate_visible = threading.Event()
         self.inline_ids: dict[str, bool] = {}      # translated messages whose translation is drawn inline
         self._inline_last = None                   # last positions sent to the GUI
@@ -142,10 +145,13 @@ class ChatService:
         return self._reader_thread is not None and self._reader_thread.is_alive()
 
     def start_reader(self):
-        if self.reader_running:
+        if self.reader_running and not self._reader_stop.is_set():
             return
-        self._reader_stop.clear()
-        self._reader_thread = threading.Thread(target=self._reader_loop, name="discord-reader", daemon=True)
+        # A fresh stop event per reader: after Stop + Start, the old thread (maybe still busy reading Discord)
+        # keeps its own set event and exits, instead of the new start being ignored.
+        self._reader_stop = stop = threading.Event()
+        self._reader_thread = threading.Thread(target=self._reader_loop, args=(stop,), name="discord-reader",
+                                               daemon=True)
         self._reader_thread.start()
 
     def stop_reader(self):
@@ -154,10 +160,9 @@ class ChatService:
 
     def translate_visible_now(self):
         self._translate_visible.set()
-        if not self.reader_running:
-            self.start_reader()
+        self.start_reader()          # no-op while a reader is running
 
-    def _reader_loop(self):
+    def _reader_loop(self, stop: threading.Event):
         try:
             import uiautomation as auto
             from .discord_reader import DiscordReader
@@ -172,14 +177,14 @@ class ChatService:
             channel = None
             last_rect = None
             missing_since = None
-            while not self._reader_stop.is_set():
+            while not stop.is_set():
                 try:
                     if not reader.find_window():
                         if missing_since is None:
                             missing_since = time.monotonic()
                             self.emit({"type": "chat_status", "text": "Discord window not found - is Discord open?",
                                        "ok": False})
-                        self._reader_stop.wait(2.0)
+                        stop.wait(2.0)
                         continue
                     missing_since = None
                     self.discord_hwnd = reader.hwnd()
@@ -248,16 +253,17 @@ class ChatService:
                     reader.lists = []
                 # Between full reads, follow where the translated messages are (~10x per second).
                 next_poll = time.monotonic() + max(0.3, int(self.cfg.get("poll_ms", 1200)) / 1000)
-                while not self._reader_stop.is_set() and time.monotonic() < next_poll:
+                while not stop.is_set() and time.monotonic() < next_poll:
                     try:
                         self._focus_tick(reader)
                         self._inline_tick(reader)
                     except Exception as e:
                         log.debug("inline: %s", e)
-                    self._reader_stop.wait(0.1)
-            self._inline_emit("hide")
-            self._discord_fg = None
-            self.emit({"type": "discord_focus", "on": False})
+                    stop.wait(0.1)
+            if stop is self._reader_stop:       # not replaced by a newer reader (whose overlay must stay)
+                self._inline_emit("hide")
+                self._discord_fg = None
+                self.emit({"type": "discord_focus", "on": False})
 
     def _focus_tick(self, reader):
         """Tell the GUI when Discord comes to the front / goes to the back (our windows only show over it)."""
@@ -390,7 +396,7 @@ class ChatService:
         self._install_hotkeys()
         if self.cfg.get("clipboard_watch"):
             self._clip_seq = winutil.clipboard_sequence()
-            self._clip_thread = threading.Thread(target=self._clipboard_loop, daemon=True)
+            self._clip_thread = threading.Thread(target=self._clipboard_loop, args=(self._clip_gen,), daemon=True)
             self._clip_thread.start()
 
     def stop_selection(self):
@@ -402,6 +408,7 @@ class ChatService:
             self._mouse = None
         self._remove_hotkeys()
         self._clip_seq = None
+        self._clip_gen += 1
 
     def _on_click(self, x, y, button, pressed):
         from pynput.mouse import Button
@@ -429,7 +436,8 @@ class ChatService:
             time.sleep(0.12)   # let the app finish updating its selection
             if winutil.foreground_is_own_app():
                 return
-            text = self.get_selected_text(force_clipboard=force)
+            with self._own_clipboard():
+                text = self.get_selected_text(force_clipboard=force)
             text = (text or "").replace("￼", "").strip()
             if len(text) < 2 or len(text) > 4000:
                 return
@@ -489,13 +497,24 @@ class ChatService:
                 log.debug("uia selection: %s", e)
         return ""
 
-    def _clipboard_loop(self):
-        while self._clip_seq is not None:
+    @contextlib.contextmanager
+    def _own_clipboard(self):
+        """The app copies/pastes through the clipboard: the clipboard watcher must not translate that."""
+        with self._clip_lock:
+            try:
+                yield
+            finally:
+                if self._clip_seq is not None:
+                    self._clip_seq = winutil.clipboard_sequence()
+
+    def _clipboard_loop(self, gen: int):
+        while gen == self._clip_gen:
             time.sleep(0.4)
-            seq = winutil.clipboard_sequence()
-            if self._clip_seq is None or seq == self._clip_seq:
-                continue
-            self._clip_seq = seq
+            with self._clip_lock:
+                seq = winutil.clipboard_sequence()
+                if gen != self._clip_gen or self._clip_seq is None or seq == self._clip_seq:
+                    continue
+                self._clip_seq = seq
             if winutil.foreground_is_own_app():
                 continue
             text = winutil.get_clipboard_text().strip()
@@ -549,6 +568,10 @@ class ChatService:
 
     def hotkey_translate_draft(self):
         """Translate the text you typed in the focused message box (Discord or anything) in place."""
+        with self._own_clipboard():
+            self._translate_draft()
+
+    def _translate_draft(self):
         winutil.wait_modifiers_released()
         hwnd, cls, _ = winutil.foreground()
         if cls in winutil.TERMINAL_CLASSES or winutil.foreground_is_own_app():
@@ -586,6 +609,10 @@ class ChatService:
         hwnd = self.discord_hwnd or self._find_discord_hwnd()
         if not hwnd:
             return "Discord window not found."
+        with self._own_clipboard():
+            return self._paste_into(hwnd, text, press_enter)
+
+    def _paste_into(self, hwnd, text: str, press_enter: bool) -> str | None:
         old = winutil.get_clipboard_text()
         winutil.set_clipboard_text(text)
         if not winutil.focus_window(hwnd):
