@@ -166,17 +166,23 @@ def installed(v: Voice) -> bool:
     return v.engine == WINDOWS or all(find_file(v.engine, f[1]) for f in v.files)
 
 
+_download_lock = threading.Lock()
+
+
 def download(v: Voice, progress=None, cancelled=lambda: False) -> None:
-    """Fetch the files of `v` into MODELS_DIR (once). progress(done_bytes, total_bytes)."""
+    """Fetch the files of `v` into MODELS_DIR (once). progress(done_bytes, total_bytes).
+    One download at a time: the voice threads, the warm-up and the Voice tab can ask for the same voice at once, and
+    two downloads writing the same file would leave a broken voice that counts as installed."""
     from .downloads import fetch
-    todo = [f for f in v.files if not find_file(v.engine, f[1])]
-    total, done = sum(f[2] for f in todo), 0
-    for url, name, _size in todo:
-        def prog(d, _t, base=done):
-            if progress:
-                progress(base + d, total)
-        fetch(url, MODELS_DIR / v.engine / name, prog, cancelled)
-        done += _size
+    with _download_lock:
+        todo = [f for f in v.files if not find_file(v.engine, f[1])]     # again: another thread may have got it
+        total, done = sum(f[2] for f in todo), 0
+        for url, name, _size in todo:
+            def prog(d, _t, base=done):
+                if progress:
+                    progress(base + d, total)
+            fetch(url, MODELS_DIR / v.engine / name, prog, cancelled)
+            done += _size
 
 
 def voices_for(lang: str | None) -> list[Voice]:
@@ -256,7 +262,11 @@ class Espeak:
     """One running espeak-ng.exe per voice language. A line of text in, one line of IPA per clause out.
 
     After each request a sentinel line is sent; its phonemes (learned at start) mark the end of the answer, so the
-    program can stay running between sentences (starting it costs ~0.1 s)."""
+    program can stay running between sentences (starting it costs ~0.1 s). The sentinel is a made-up word: with a
+    real one ("1.") a sentence saying it ("One.", a numbered list) ended the answer early and every later sentence
+    got the phonemes of the one before."""
+
+    SENTINEL = "Qxzvjk."
 
     _instances: dict[str, "Espeak"] = {}
     _ilock = threading.Lock()
@@ -292,7 +302,7 @@ class Espeak:
                 q.put(line.decode("utf-8", "replace").strip())
             q.put(None)
         threading.Thread(target=reader, name=f"espeak-{self.voice}", daemon=True).start()
-        self._write("1.")
+        self._write(self.SENTINEL)
         self._sentinel = self._read_line(10.0)
 
     def _write(self, line: str):
@@ -314,7 +324,7 @@ class Espeak:
                         self._start()
                     for p in parts:
                         self._write(p)
-                    self._write("1.")
+                    self._write(self.SENTINEL)
                     lines = []
                     while True:
                         line = self._read_line(10.0)

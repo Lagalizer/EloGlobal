@@ -248,7 +248,20 @@ def migrate(data: dict) -> dict:
 
 def load_profile(name: str) -> dict:
     p = profile_path(name)
-    data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    data = {}
+    if p.exists():
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                raise ValueError("not a profile")
+        except ValueError:
+            # A damaged profile (edited by hand, disk error) used to stop EloGlobal from starting at all: keep it
+            # aside as <name>.json.broken and start this profile from the defaults.
+            try:
+                os.replace(p, p.with_name(p.name + ".broken"))
+            except OSError:
+                pass
+            data = {}
     prof = deep_merge(default_profile(), migrate(data))
     prof["name"] = name
     return prof

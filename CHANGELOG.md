@@ -8,7 +8,14 @@
 - **Fixes**: Stop + Start while the engines load no longer starts the audio twice; chat translation Stop + Start
   works while the old reader is still busy; no duplicate clipboard watchers and no popups for the app's own
   clipboard use; echo check can't crash during Stop.
-- **Safer**: updates are checked against GitHub's SHA-256 checksum; local AI requests refuse redirects and proxies;
+- **More fixes (full audit)**: Stop no longer speaks a sentence that was still being recognised or translated
+  (and no longer reopens the audio it just closed); the voice no longer gets one sentence behind after "One." or a
+  numbered list ("1."); a voice or translation model needed by several parts at once is downloaded once (two
+  downloads could leave a broken voice file, and up to 4 parallel 280 MB downloads); a damaged profile file no longer
+  stops EloGlobal from starting (kept as .broken); the chat reader no longer keeps every message element it read;
+  windows saved on a monitor that was unplugged open on screen again; Screen-text watch skips a turn while the last
+  one is still running.
+- **Safer**: updates are checked against GitHub's SHA-256 checksum, NVIDIA libraries against PyPI's; local AI requests refuse redirects and proxies;
   settings, secrets and the Discord-volume file are written atomically.
 
 ## 1.0.1 - 2026-10-15 - text-only voice translation, GitHub download with updates

@@ -112,6 +112,7 @@ class Pipeline:
         self._stt_cv = threading.Condition()
         self.mt_q: queue.Queue = queue.Queue()
         self.running = False
+        self.stopped = False                  # stop() was called: nothing more is translated or spoken
         self.threads: list[threading.Thread] = []
         self._passthrough_ok = False
         self.app_capture = False              # listening to the Discord app only (never hears the app's voice)
@@ -178,6 +179,7 @@ class Pipeline:
 
     def stop(self):
         self.running = False
+        self.stopped = True
         if self.source:
             self.source.stop()
             self.source = None
@@ -288,7 +290,7 @@ class Pipeline:
     def _mt_worker(self):
         while True:
             job = self.mt_q.get()
-            if job is None:
+            if job is None or self.stopped:   # stopped: drop what was still waiting
                 return
             try:
                 self.process_text(**job)
@@ -322,7 +324,7 @@ class Pipeline:
         job = {"text": text, "detected": detected, "t0": t0, "timings": {"stt": t_stt}, "who": who}
         if self.running:
             self.mt_q.put(job)                 # translated on its own thread: the next sentence is recognised now
-        else:
+        elif not self.stopped:                 # a pipeline used without start() (tools): translate right here
             self.process_text(**job)
 
     def process_text(self, text, detected=None, t0=None, timings=None, typed=False, who: str = ""):
@@ -358,6 +360,8 @@ class Pipeline:
             timings["mt"] = time.monotonic() - t
             if not translated.strip():
                 return
+        if self.stopped and not typed:
+            return              # Stop was pressed while this was translated: don't speak (or reopen the audio)
 
         eng.add_history(who or ("Them" if self.dir == "incoming" else "Me"), text, translated)
         speak = bool(self.cfg.get("speak", True)) and not (skipped and self.dir == "incoming"

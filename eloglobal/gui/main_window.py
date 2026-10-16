@@ -29,7 +29,7 @@ from .overlay import SubtitleOverlay
 from .text_tab import TextTabMixin
 from .tour import TourMixin
 from .widgets import (DataCombo, DeviceCombo, LangCombo, LevelMeter, ProviderPanel, VolumeSlider, change_signal,
-                      run_async, set_widget_value, widget_value)
+                      on_screen, run_async, set_widget_value, widget_value)
 
 log = logging.getLogger("eloglobal.gui")
 
@@ -110,7 +110,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         self.lines: list[dict] = []
         self.transcript_file = None
         self.overlay = SubtitleOverlay(self.colors, self.profile["ui"])
-        if self.state.get("overlay_geometry"):
+        if on_screen(self.state.get("overlay_geometry")):
             x, y, w, h = self.state["overlay_geometry"]
             self.overlay.setGeometry(x, y, w, h)
         else:
@@ -127,7 +127,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
         self.load_profile_into_ui()
         self._refresh_profile_combo()
         self._update_chat_toggle(bool(self.profile["chat"].get("auto_translate")))
-        if self.state.get("geometry"):
+        if on_screen(self.state.get("geometry")):            # not on a monitor that was unplugged
             self.setGeometry(*self.state["geometry"])
 
         self._autosave_timer = QTimer(self)      # saves the profile shortly after the last change
@@ -175,6 +175,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
 
         sb = self.statusBar()
         self.status_label = QLabel()
+        self.status_label.setTextFormat(Qt.PlainText)   # shows error texts from servers / Discord: never as HTML
         self.their_label = QLabel()
         self.latency_label = QLabel()
         sb.addWidget(self.status_label, 1)
@@ -1044,7 +1045,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
                 (ev["dir"] == "outgoing" and ui.get("subtitle_show_mine", True)):
             name = f"{ev['who']}: " if ev.get("who") else ""
             self.overlay.add(ev["dir"], name + ev["translated"], ev["original"])
-        if ui.get("autosave_transcript", True):
+        if ui.get("autosave_transcript", False):          # off unless chosen (privacy notice)
             self._autosave(ln)
 
     def _add_notice(self, text):
@@ -1150,6 +1151,7 @@ class MainWindow(DashboardMixin, SettingsTabMixin, ManualTabMixin, TextTabMixin,
                       "and click <b>Authorize</b> in the window Discord shows. EloGlobal then only logs in to "
                       "Discord with your own application; no audio or messages are sent."))
         self.rpc_status = QLabel("Off")
+        self.rpc_status.setTextFormat(Qt.PlainText)
         self.rpc_status.setWordWrap(True)
         self.rpc_status.setObjectName("muted")
         f.addRow("Status", self.rpc_status)
