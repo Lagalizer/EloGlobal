@@ -81,6 +81,9 @@ def _text_of(el) -> str:
 class DiscordReader:
     """Call poll() repeatedly from ONE thread; it returns the messages currently loaded."""
 
+    MAX_TRACKED = 300     # message-text elements kept: every message read was kept until the chat changed (a leak of
+                          # UI Automation elements in busy channels); a translated one that is dropped is found again
+
     def __init__(self):
         import uiautomation as auto   # noqa: F401  (imported here so the app runs without it)
         self.auto = auto
@@ -216,7 +219,13 @@ class DiscordReader:
         if content_el is None:
             content_el = self._find_content(item)
         if content_el is not None:
-            self.content_els[mid] = (content_el, getattr(self, "_item_list", {}).get(id(item)))
+            self._remember(mid, (content_el, getattr(self, "_item_list", {}).get(id(item))))
+
+    def _remember(self, mid: str, entry: tuple):
+        self.content_els.pop(mid, None)
+        self.content_els[mid] = entry
+        while len(self.content_els) > self.MAX_TRACKED:
+            self.content_els.pop(next(iter(self.content_els)))
 
     @staticmethod
     def _find_content(item):
@@ -310,7 +319,7 @@ class DiscordReader:
                                         if c.ControlTypeName in ("ButtonControl", "TextControl") and c.Name))
             elif aid.startswith("message-content-"):
                 text = _text_of(el)
-                self.content_els[msg_id] = (el, getattr(self, "_item_list", {}).get(id(item)))
+                self._remember(msg_id, (el, getattr(self, "_item_list", {}).get(id(item))))
             elif aid.startswith("message-accessories-"):
                 embed = _text_of(el)
             elif aid.startswith("message-timestamp-"):

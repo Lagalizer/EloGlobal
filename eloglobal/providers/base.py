@@ -64,6 +64,17 @@ def is_local_address(url: str) -> bool:
         return False
 
 
+class _RefuseRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(req.full_url, code, f"redirect to {newurl} refused (only local servers)",
+                                     headers, fp)
+
+
+# Local AI servers: no redirects (a server on the network could send the request somewhere else) and no system
+# proxy (the request must go straight to the local address, not through a proxy on the internet).
+_NO_REDIRECTS = urllib.request.build_opener(_RefuseRedirects(), urllib.request.ProxyHandler({}))
+
+
 class Provider:
     id = ""
     name = ""
@@ -109,8 +120,8 @@ class Provider:
         data = json.dumps(body).encode("utf-8") if body is not None else None
         h = {"Content-Type": "application/json", **(headers or {})}
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h, method=method),
-                                        timeout=timeout) as r:
+            with _NO_REDIRECTS.open(urllib.request.Request(url, data=data, headers=h, method=method),
+                                    timeout=timeout) as r:
                 return json.loads(r.read().decode("utf-8") or "null")
         except urllib.error.HTTPError as e:
             text = e.read().decode("utf-8", "replace")[:300].replace("\n", " ")

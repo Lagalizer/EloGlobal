@@ -123,6 +123,11 @@ if Discord uses your real microphone instead of the cable.
 Discord down in the Windows volume mixer, and gives it its volume back when you press Stop. Press F9, or the Hear
 people button, to also hear their own voices. You can change the key on the Input tab.
 
+**Missed something? Ctrl+Alt+R** says the last translation again, in your headphones. **Ctrl+Alt+L** sets the
+language they speak to the one the app just heard: recognition gets faster, and your replies go to that language.
+Press it again for Auto-detect when you join another group. You can change both keys on the Input tab, and the
+Live tab has buttons for them too.
+
 **One voice, in order.** The translations of the call and the chat messages read aloud share one voice, so they
 never talk over each other. Everything is said in the order it was spoken, and nothing is skipped: the next line is
 prepared while the current one plays, and when lines pile up, the voice speaks a little faster.

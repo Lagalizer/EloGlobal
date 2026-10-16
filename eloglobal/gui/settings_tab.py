@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QFontCom
                                QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
                                QWidget)
 
-from .. import APP_NAME, __version__, config, i18n, updater, voice_download
+from .. import APP_NAME, DONATE_URL, __version__, config, i18n, updater, voice_download
 from .widgets import DataCombo, DeviceCombo, VolumeSlider, run_async
 
 APPEARANCE_DEFAULTS = {
@@ -163,7 +163,9 @@ class SettingsTabMixin:
                                 ("Translate text on screen (OCR)", "chat.hotkey_ocr", "ctrl+alt+o"),
                                 ("Show originals / translations in Discord", "chat.hotkey_inline", "ctrl+alt+i"),
                                 ("Push-to-talk (voice translator)", "input.ptt_key", "f8"),
-                                ("Hear the people in the call on / off", "input.hear_key", "f9")]:
+                                ("Hear the people in the call on / off", "input.hear_key", "f9"),
+                                ("Repeat the last translation", "input.repeat_key", "ctrl+alt+r"),
+                                ("Lock / unlock the language they speak", "input.lang_key", "ctrl+alt+l")]:
             e = self.bind(QLineEdit(), path)
             e.setPlaceholderText(f"e.g. {eg} - empty = off")
             f.addRow(label, e)
@@ -189,6 +191,10 @@ class SettingsTabMixin:
         b = QPushButton("About && licences")
         b.clicked.connect(lambda: self._show_about())
         row.addWidget(b)
+        if DONATE_URL and updater.repo():     # GitHub edition only: the stores have their own payment rules
+            b = QPushButton("♥ Donate")
+            b.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(DONATE_URL)))
+            row.addWidget(b)
         row.addStretch(1)
         bl.addLayout(row)
         v.addWidget(box)

@@ -6,7 +6,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QTabWidget, QTextBrowser,
                                QVBoxLayout)
 
-from .. import APP_NAME, PRIVACY_URL, __version__, config
+from .. import APP_NAME, DONATE_URL, PRIVACY_URL, __version__, config, updater
 from ..i18n import no_translate
 
 PRIVACY_TEXT = (
@@ -80,8 +80,9 @@ class AboutDialog(QDialog):
         v.addWidget(head)
         info = QLabel("Real-time voice and chat translator for voice calls. Works with Discord - not affiliated with, "
                       "endorsed or sponsored by Discord Inc. “Discord” is a trademark of Discord Inc.<br>"
-                      "© 2026 Lagalizer. EloGlobal is open source software under the MIT licence. It includes "
-                      "other open source software and models - see the list below.")
+                      "© 2026 Lagalizer. EloGlobal is free to use, but it may not be sold, copied or changed - "
+                      "see the Licence tab. It includes open source software and models made by others - "
+                      "see the list below.")
         info.setWordWrap(True)
         info.setTextFormat(Qt.RichText)
         v.addWidget(info)
@@ -104,6 +105,10 @@ class AboutDialog(QDialog):
         b = QPushButton("Full privacy policy")
         b.clicked.connect(_open_privacy_policy)
         row.addWidget(b)
+        if DONATE_URL and updater.repo():
+            b = QPushButton("♥ Donate")
+            b.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(DONATE_URL)))
+            row.addWidget(b)
         row.addStretch(1)
         close = QPushButton("Close")
         close.clicked.connect(self.accept)

@@ -13,7 +13,7 @@ from ..chat import ocr
 from ..chat.service import ChatService
 from .text_widgets import ChatOverlay, InlineOverlay, OcrResultBox, TranslationPopup, select_area
 from ..providers import REGISTRY
-from .widgets import DataCombo, LangCombo, run_async
+from .widgets import DataCombo, LangCombo, on_screen, run_async
 
 CHAT_RESTART_KEYS = ("select_translate", "select_scope", "hotkey_selection", "hotkey_draft", "hotkey_ocr",
                      "hotkey_inline", "clipboard_watch")
@@ -44,7 +44,7 @@ class TextTabMixin:
         self.chat_overlay.turned_off.connect(self._chat_overlay_off)
         self.inline.avoid = [self.chat_overlay, self.popup, self.ocr_box]   # never draw under our own windows
         self.chat_overlay.geometry_changed.connect(self.inline.update)
-        if self.state.get("chat_overlay_geometry"):
+        if on_screen(self.state.get("chat_overlay_geometry")):
             x, y, w, h = self.state["chat_overlay_geometry"]
             self.chat_overlay.setGeometry(x, y, w, h)
             self.chat_overlay.moved_by_user = bool(self.state.get("chat_overlay_moved"))
@@ -52,6 +52,7 @@ class TextTabMixin:
         self._discord_front = True        # updated by the chat reader: Discord (or EloGlobal) is the active window
         self._window_waiting = False      # small window hidden because Discord is in the background
         self._ocr_last_text = ""
+        self._ocr_busy = False            # an OCR + translation still running: the watch timer skips its turn
         self._ocr_timer = QTimer(self)
         self._ocr_timer.timeout.connect(lambda: self._run_ocr(self._ocr_area, quiet=True))
         self._chat_keys_snapshot = None
@@ -78,6 +79,7 @@ class TextTabMixin:
         ov = QPushButton("Show small window")
         ov.clicked.connect(self._show_chat_overlay)
         self.chat_status = QLabel("off")
+        self.chat_status.setTextFormat(Qt.PlainText)    # shows the Discord channel name, which anyone can choose
         self.chat_status.setObjectName("muted")
         row.addWidget(self.chat_toggle)
         row.addWidget(now)
@@ -315,7 +317,7 @@ class TextTabMixin:
                     self._window_waiting = True      # appears when you switch back to Discord
                 elif not self.chat_overlay.isVisible():
                     self.chat_overlay.show()
-            if self.profile["ui"].get("autosave_transcript", True):
+            if self.profile["ui"].get("autosave_transcript", False):
                 self._autosave({"dir": "incoming", "time": time.strftime("%H:%M:%S"),
                                 "src": ev.get("src"), "tgt": ev["tgt"], "translated": f"[chat] {ev['author']}: "
                                 f"{ev['translated']}", "original": ev["original"]})
@@ -423,8 +425,9 @@ class TextTabMixin:
                 self.ocr_watch.setChecked(False)
 
     def _run_ocr(self, rect, quiet=False):
-        if not rect:
+        if not rect or (quiet and self._ocr_busy):
             return
+        self._ocr_busy = True
         cfg = self.profile["chat"]
         target = cfg.get("target_lang") or self.profile["incoming"]["target_lang"]
         lang = cfg.get("ocr_lang", "auto")
@@ -445,6 +448,7 @@ class TextTabMixin:
             return (text, out, det)
 
         def done(res, err):
+            self._ocr_busy = False
             if err:
                 self.setStatus(f"⚠ OCR: {err}", error=True)
                 if hide_box:

@@ -1,5 +1,7 @@
 # EloGlobal
 
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?logo=paypal&logoColor=white)](https://paypal.me/bmgpt)
+
 **Real-time voice and chat translator for voice calls - works with Discord.** Hear everyone in your language, speak
 in theirs. Everything runs on your own Windows PC: speech recognition, translation and voices. Nothing anyone says or
 writes is sent to the internet.
@@ -25,7 +27,8 @@ commercial distribution.
 - **They hear you in theirs** - your microphone is translated and spoken into Discord through a virtual cable
   ([VB-Audio Virtual Cable](https://vb-audio.com/Cable/), installed by the user - not included).
 - **One app voice** - call translations and chat messages share one queue, never overlap, catch up when they pile up;
-  optional "who is talking" names through Discord's local RPC.
+  optional "who is talking" names through Discord's local RPC. Missed something? **Ctrl+Alt+R** repeats the last
+  translation; **Ctrl+Alt+L** locks the language they speak (faster recognition).
 - **Text** - Discord chat translated inside Discord (Windows UI Automation), select-to-translate, screen OCR, write
   in their language.
 - **10 UI languages**, guided tour and a manual read aloud by a voice of the PC.
@@ -39,8 +42,12 @@ commercial distribution.
 | Voices | Piper voices trained from scratch (PD / CC0 / CC-BY), Kokoro-82M, Windows voices | see THIRD_PARTY_NOTICES.txt |
 | Phonemes | eSpeak NG 1.52 as a separate program (GPL-3, source included) | GPL-3.0 (separate) |
 
-EloGlobal itself is **MIT** (see [LICENSE](LICENSE)); every component is listed in
-[THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Privacy policy: [PRIVACY.md](PRIVACY.md).
+EloGlobal itself is **not open source**: © Lagalizer, all rights reserved. It is free to download and use, but it
+may not be sold, copied, redistributed or modified - see [LICENSE](LICENSE). (1.0.0 and 1.0.1 were released under
+MIT.) The third-party components keep their own licences, listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Privacy policy: [PRIVACY.md](PRIVACY.md).
+
+**Like EloGlobal?** It's free - if it helps you, you can support it with a
+[donation on PayPal](https://paypal.me/bmgpt) (also the *♥ Donate* button in the GitHub edition: Settings, About).
 
 ## Development
 

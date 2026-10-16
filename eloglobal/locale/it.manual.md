@@ -102,6 +102,11 @@ Discord usa il tuo vero microfono invece del cavo.
 Discord nel mixer del volume di Windows e gli ridà il volume quando premi Ferma. Premi F9, o il pulsante Senti le
 persone, per sentire anche le loro voci. Puoi cambiare il tasto nella scheda Ingresso.
 
+**Ti sei perso qualcosa? Ctrl+Alt+R** ripete l'ultima traduzione, nelle tue cuffie. **Ctrl+Alt+L** blocca la
+lingua che parlano su quella che l'app ha appena sentito: il riconoscimento diventa più veloce, e le tue risposte
+vanno in quella lingua. Premi di nuovo per tornare a Rilevamento automatico quando entri in un altro gruppo. Puoi
+cambiare i due tasti nella scheda Ingresso, e la scheda Dal vivo ha anche dei pulsanti per loro.
+
 **Una sola voce, in ordine.** Le traduzioni della chiamata e i messaggi della chat letti ad alta voce condividono
 una sola voce, quindi non parlano mai uno sopra l'altro. Tutto viene detto nell'ordine in cui è stato pronunciato e
 niente viene saltato: la frase successiva viene preparata mentre suona quella attuale, e quando le frasi si

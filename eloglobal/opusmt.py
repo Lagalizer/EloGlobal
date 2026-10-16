@@ -34,10 +34,24 @@ INDEX = DIR / "index.json"                       # pair -> chosen release (so a 
 _TOKENS = {"pt": ("pob", "por"), "pt-PT": ("por",), "zh": ("cmn_Hans", "zho_Hans", "cmn"),
            "zh-TW": ("cmn_Hant", "zho_Hant", "cmn"), "sr": ("srp_Cyrl", "srp_Latn"), "no": ("nob", "nno")}
 _SENT = re.compile(r"(?<=[.!?。！？])\s+")
+NO_MODEL_RECHECK_S = 7 * 86400                   # a pair without a model is looked up again after a week
+_NO_SPACES = ("zh", "ja")                        # languages that don't put a space between sentences
 
 
 class OpusError(Exception):
     pass
+
+
+# The live pipelines, the chat translations (4 at a time) and the "download now" button can all need the same
+# missing pair at once: one lock per pair makes them wait for a single download instead of each fetching 280 MB.
+_pair_locks: dict[tuple[str, str], threading.RLock] = {}
+_locks_guard = threading.Lock()
+_index_lock = threading.Lock()
+
+
+def _pair_lock(src3: str, tgt3: str) -> threading.RLock:
+    with _locks_guard:
+        return _pair_locks.setdefault((src3, tgt3), threading.RLock())
 
 
 def pair_dir(src3: str, tgt3: str) -> Path:
@@ -57,7 +71,9 @@ def _index() -> dict:
 
 def _save_index(data: dict) -> None:
     DIR.mkdir(parents=True, exist_ok=True)
-    INDEX.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    tmp = INDEX.with_name(INDEX.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    os.replace(tmp, INDEX)
 
 
 def _list_releases(src3: str, tgt3: str) -> list[tuple[str, int]]:
@@ -91,15 +107,21 @@ def _rank(key: str, best: bool) -> tuple:
 def find_release(src3: str, tgt3: str, best: bool = False) -> tuple[str, int] | None:
     idx = _index()
     k = f"{src3}-{tgt3}{'+best' if best else ''}"
-    if k in idx:
-        return tuple(idx[k]) if idx[k] else None
+    hit = idx.get(k)
+    if isinstance(hit, list):
+        return tuple(hit)
+    if isinstance(hit, dict) and time.time() - hit.get("none_since", 0) < NO_MODEL_RECHECK_S:
+        return None
+    # never asked, or "no model" more than a week ago: new models are published over time, so ask again
     try:
         rel = _list_releases(src3, tgt3)
     except Exception as e:  # noqa: BLE001
         raise OpusError(f"Could not reach the OPUS-MT model server to download {src3}->{tgt3}: {e}") from e
     pick = sorted(rel, key=lambda r: _rank(r[0], best))[0] if rel else None
-    idx[k] = list(pick) if pick else None
-    _save_index(idx)
+    with _index_lock:                       # several pairs can be looked up at once
+        idx = _index()
+        idx[k] = list(pick) if pick else {"none_since": time.time()}
+        _save_index(idx)
     return pick
 
 
@@ -122,8 +144,13 @@ def route(src: str, tgt: str, best: bool = False) -> list[tuple[str, str]]:
 def download(src3: str, tgt3: str, progress=None, cancelled=lambda: False, best: bool = False) -> Path:
     """Fetch + convert one pair (once). progress(done_bytes, total_bytes) while downloading."""
     out = pair_dir(src3, tgt3)
-    if (out / "model.bin").is_file():
-        return out
+    with _pair_lock(src3, tgt3):
+        if (out / "model.bin").is_file():           # (again) another thread may just have finished it
+            return out
+        return _download(src3, tgt3, out, progress, cancelled, best)
+
+
+def _download(src3: str, tgt3: str, out: Path, progress, cancelled, best: bool) -> Path:
     rel = find_release(src3, tgt3, best)
     if not rel:
         raise OpusError(f"There is no OPUS-MT model for {src3} -> {tgt3}.")
@@ -200,19 +227,24 @@ class Translator:
             m = self._models.get(key)
         if m is not None:
             return m
-        if not is_ready(src3, tgt3):
-            if on_status:
-                on_status(f"Downloading the translation model {src3} -> {tgt3} (once, about 280 MB)…")
-            download(src3, tgt3)
-        try:
-            m = _Model(pair_dir(src3, tgt3), device)
-        except Exception:  # noqa: BLE001 - e.g. no CUDA libraries: the CPU always works
-            if device == "cpu":
-                raise
-            m = _Model(pair_dir(src3, tgt3), "cpu")
-        with self._lock:
-            self._models[key] = m
-        return m
+        with _pair_lock(src3, tgt3):                 # load each model once, even when asked for at the same time
+            with self._lock:
+                m = self._models.get(key)
+            if m is not None:
+                return m
+            if not is_ready(src3, tgt3):
+                if on_status:
+                    on_status(f"Downloading the translation model {src3} -> {tgt3} (once, about 280 MB)…")
+                download(src3, tgt3)
+            try:
+                m = _Model(pair_dir(src3, tgt3), device)
+            except Exception:  # noqa: BLE001 - e.g. no CUDA libraries: the CPU always works
+                if device == "cpu":
+                    raise
+                m = _Model(pair_dir(src3, tgt3), "cpu")
+            with self._lock:
+                self._models[key] = m
+            return m
 
     def translate(self, text: str, src: str, tgt: str, device: str = "cpu", beam: int = 2, on_status=None) -> str:
         hops = route(src, tgt)
@@ -224,7 +256,8 @@ class Translator:
         for i, (a, b) in enumerate(hops):
             target = tgt if i == len(hops) - 1 else "en"
             sentences = self.model(a, b, device, on_status).translate(sentences, target, beam)
-        return " ".join(s.strip() for s in sentences if s.strip())
+        sep = "" if L.base(tgt) in _NO_SPACES else " "
+        return sep.join(s.strip() for s in sentences if s.strip())
 
 
 TRANSLATOR = Translator()

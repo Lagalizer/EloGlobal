@@ -7,6 +7,7 @@ that folder to the DLL search path at start-up. No pip, so it works in the read-
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -34,8 +35,8 @@ def installed() -> bool:
     return all((GPU_DIR / n).is_file() for n in NEEDED)
 
 
-def _wheel_url(name: str, major: str) -> tuple[str, int, str]:
-    """(url, bytes, version) of the newest Windows x64 wheel of `name` whose version starts with `major`."""
+def _wheel_url(name: str, major: str) -> tuple[str, int, str, str]:
+    """(url, bytes, version, sha256) of the newest Windows x64 wheel of `name` whose version starts with `major`."""
     with urllib.request.urlopen(f"https://pypi.org/pypi/{name}/json", timeout=20) as r:
         data = json.loads(r.read())
 
@@ -44,11 +45,19 @@ def _wheel_url(name: str, major: str) -> tuple[str, int, str]:
     for version in sorted((v for v in data["releases"] if v.startswith(major)), key=key, reverse=True):
         for f in data["releases"][version]:
             if f["filename"].endswith("win_amd64.whl") and not f.get("yanked"):
-                return f["url"], int(f["size"]), version
+                return f["url"], int(f["size"]), version, (f.get("digests") or {}).get("sha256", "")
     raise RuntimeError(f"No Windows package of {name} {major}x found on PyPI.")
 
 
-def plan() -> list[tuple[str, int, str]]:
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def plan() -> list[tuple[str, int, str, str]]:
     return [_wheel_url(n, m) for n, m in PACKAGES]
 
 
@@ -56,15 +65,17 @@ def download(progress=None, cancelled=lambda: False) -> None:
     """Fetch the CUDA libraries into MODELS_DIR/gpu (once). progress(done_bytes, total_bytes)."""
     from .downloads import fetch
     items = plan()
-    total, done = sum(s for _u, s, _v in items), 0
+    total, done = sum(s for _u, s, _v, _h in items), 0
     tmp = GPU_DIR.with_name("gpu-download")
     tmp.mkdir(parents=True, exist_ok=True)
     GPU_DIR.mkdir(parents=True, exist_ok=True)
     try:
-        for url, size, _version in items:
+        for url, size, _version, sha256 in items:
             whl = tmp / url.rsplit("/", 1)[1]
             fetch(url, whl, (lambda d, _t, base=done: progress and progress(base + d, total)), cancelled)
             done += size
+            if sha256 and _sha256(whl) != sha256.lower():   # these DLLs are loaded into the app: check them
+                raise RuntimeError(f"{whl.name}: the download doesn't match PyPI's checksum - try again.")
             with zipfile.ZipFile(whl) as z:
                 for m in z.namelist():
                     if m.lower().endswith(".dll") and "/bin/" in m.replace("\\", "/"):

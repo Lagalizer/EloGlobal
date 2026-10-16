@@ -112,6 +112,7 @@ class Pipeline:
         self._stt_cv = threading.Condition()
         self.mt_q: queue.Queue = queue.Queue()
         self.running = False
+        self.stopped = False                  # stop() was called: nothing more is translated or spoken
         self.threads: list[threading.Thread] = []
         self._passthrough_ok = False
         self.app_capture = False              # listening to the Discord app only (never hears the app's voice)
@@ -178,6 +179,7 @@ class Pipeline:
 
     def stop(self):
         self.running = False
+        self.stopped = True
         if self.source:
             self.source.stop()
             self.source = None
@@ -288,7 +290,7 @@ class Pipeline:
     def _mt_worker(self):
         while True:
             job = self.mt_q.get()
-            if job is None:
+            if job is None or self.stopped:   # stopped: drop what was still waiting
                 return
             try:
                 self.process_text(**job)
@@ -322,7 +324,7 @@ class Pipeline:
         job = {"text": text, "detected": detected, "t0": t0, "timings": {"stt": t_stt}, "who": who}
         if self.running:
             self.mt_q.put(job)                 # translated on its own thread: the next sentence is recognised now
-        else:
+        elif not self.stopped:                 # a pipeline used without start() (tools): translate right here
             self.process_text(**job)
 
     def process_text(self, text, detected=None, t0=None, timings=None, typed=False, who: str = ""):
@@ -358,8 +360,12 @@ class Pipeline:
             timings["mt"] = time.monotonic() - t
             if not translated.strip():
                 return
+        if self.stopped and not typed:
+            return              # Stop was pressed while this was translated: don't speak (or reopen the audio)
 
         eng.add_history(who or ("Them" if self.dir == "incoming" else "Me"), text, translated)
+        if self.dir == "incoming" and not skipped and not typed:
+            eng.last_heard = (translated, target, who)
         speak = bool(self.cfg.get("speak", True)) and not (skipped and self.dir == "incoming"
                                                            and self.cfg.get("skip_same_language", True))
         line_id = eng.next_line_id()
@@ -387,6 +393,7 @@ class Engine(TextEngine):
         self.pipelines: dict[str, Pipeline] = {}
         self.speakers: dict[str, Speaker] = {}
         self.their_language: str | None = None
+        self.last_heard: tuple[str, str, str] | None = None   # (translation, language, who) - for "Repeat"
         self.running = False
         self.paused_incoming = False
         self.muted_outgoing = False
@@ -398,6 +405,8 @@ class Engine(TextEngine):
         self._hotkey_hooks = []
         self._ptt_down = False
         self._watch_stop = threading.Event()
+        self._run_id = 0                      # bumped by every start(): a late, superseded start does nothing
+        self._start_lock = threading.Lock()   # one start at a time (Stop + Start while engines still load)
         self._warned: dict[str, str] = {}
         threading.Thread(target=self._restore_discord_volume, name="restore-volume", daemon=True).start()
         self._update_rpc()
@@ -465,8 +474,8 @@ class Engine(TextEngine):
         t_end = t_end or now
         t_start = t_start if t_start is not None else t_end - 30
         for d, sp in self.speakers.items():
-            loose = bool(lang) and L.same_language(lang, self.pipelines[d].target_language() if d in self.pipelines
-                                                   else self.profile[d]["target_lang"])
+            pl = self.pipelines.get(d)          # the dict can be cleared by Stop meanwhile
+            loose = bool(lang) and L.same_language(lang, pl.target_language() if pl else self.profile[d]["target_lang"])
             for start, end, said in list(sp.recent):
                 if t_start < (end or now) + 0.8 and t_end > start and is_echo_of(text, said, loose):
                     return True
@@ -539,13 +548,13 @@ class Engine(TextEngine):
         except Exception as e:  # noqa: BLE001
             log.debug("restore volume: %s", e)
 
-    def _watch(self):
+    def _watch(self, run: int):
         """While running: Discord's mixer volume (hear people on/off + ducking) and the microphone check."""
         from .audio import winaudio
         from .config import DATA_DIR
         devices.ensure_com()
         last_factor, last_apply, last_mic = None, 0.0, 0.0
-        while not self._watch_stop.wait(0.1):
+        while run == self._run_id and not self._watch_stop.wait(0.1):
             pl = self.pipelines.get("incoming")
             now = time.monotonic()
             try:
@@ -573,7 +582,7 @@ class Engine(TextEngine):
                     self._check_discord_mic()
             except Exception as e:  # noqa: BLE001
                 log.debug("watch: %s", e)
-        if self.app_volume is not None:
+        if self.app_volume is not None and run == self._run_id:   # a newer run owns it otherwise
             self.app_volume.restore()
             self.app_volume = None
 
@@ -610,10 +619,21 @@ class Engine(TextEngine):
         if self.running:
             return
         self.running = True
+        self._run_id += 1
         self.emit({"type": "state", "running": True})
-        threading.Thread(target=self._start_bg, daemon=True).start()
+        threading.Thread(target=self._start_bg, args=(self._run_id,), daemon=True).start()
 
-    def _start_bg(self):
+    def _is_current(self, run: int) -> bool:
+        return self.running and run == self._run_id
+
+    def _start_bg(self, run: int):
+        # Stop + Start while the engines load: the old start finishes (and cleans up) before the new one begins,
+        # so two runs never open the audio, the hotkeys or the watch thread twice.
+        with self._start_lock:
+            if self._is_current(run):
+                self._start_run(run)
+
+    def _start_run(self, run: int):
         try:
             self.emit_status("Loading engines…")
             for kind in ("stt", "translate", "tts"):
@@ -630,6 +650,8 @@ class Engine(TextEngine):
             if stt.local and self.profile["incoming"]["source_lang"] == L.AUTO:
                 self.emit_status("Tip: on the Live tab, choose the language they speak instead of Auto-detect - "
                                  "speech recognition on this PC gets about twice as fast.")
+            if not self._is_current(run):   # stopped while the engines loaded: don't open the audio at all
+                return
             started = []
             self.emit({"type": "hear", "on": self.hear_originals})
             for d in ("incoming", "outgoing"):
@@ -651,12 +673,12 @@ class Engine(TextEngine):
                     self.emit_error(str(e))
             self._check_outgoing_device()
             self._install_hotkeys()
-            self._watch_stop.clear()
-            self._warned.clear()
-            threading.Thread(target=self._watch, name="engine-watch", daemon=True).start()
-            if not self.running:   # stopped while we were loading
+            if not self._is_current(run):   # stopped while we were loading
                 self._teardown()
                 return
+            self._watch_stop.clear()
+            self._warned.clear()
+            threading.Thread(target=self._watch, args=(run,), name="engine-watch", daemon=True).start()
             if started:
                 self.emit_status("Running: " + " + ".join(started))
             else:
@@ -664,11 +686,17 @@ class Engine(TextEngine):
                 self.stop()
         except ProviderError as e:
             self.emit_error(str(e))
-            self.stop()
+            self._stop_if_current(run)
         except Exception as e:
             log.exception("start failed")
             self.emit_error(f"Start failed: {e}")
+            self._stop_if_current(run)
+
+    def _stop_if_current(self, run: int):
+        if self._is_current(run):
             self.stop()
+        else:                      # superseded/stopped meanwhile: clean up only what this start opened
+            self._teardown()
 
     def _prepare_models(self):
         """Download (once, with a message) and load what the first sentences need - the voices and the translation
@@ -774,6 +802,15 @@ class Engine(TextEngine):
             pl.segmenter.set_ptt(down)
             self.emit({"type": "ptt", "down": pl.segmenter.ptt_down})
 
+    def repeat_last(self):
+        """Say the last translation of the others again, in your headphones (hotkey / Repeat button)."""
+        last = self.last_heard
+        if not last:
+            self.emit_status("Nothing to repeat yet.")
+            return
+        text, lang, who = last
+        self.speaker("incoming").say(Utterance(text, lang, kind="voice", who=who))
+
     def stop_speaking(self):
         for sp in self.speakers.values():
             sp.cancel()
@@ -794,6 +831,16 @@ class Engine(TextEngine):
                     hear, lambda: threading.Thread(target=self.toggle_hear, daemon=True).start())))
             except Exception as e:
                 self.emit_error(f"Could not register hotkey '{hear}': {e}")
+        # repeat the last translation; lock / unlock their language (the window changes the languages)
+        for name, action in (("repeat_key", self.repeat_last), ("lang_key", lambda: self.emit({"type": "lang_key"}))):
+            combo = (self.profile["input"].get(name) or "").strip()
+            if not combo:
+                continue
+            try:
+                self._hotkey_hooks.append(("hotkey", keyboard.add_hotkey(
+                    combo, lambda fn=action: threading.Thread(target=fn, daemon=True).start())))
+            except Exception as e:
+                self.emit_error(f"Could not register hotkey '{combo}': {e}")
         key = (self.profile["input"].get("ptt_key") or "").strip()
         if self.profile["input"]["mic_mode"] not in ("ptt", "toggle") or not key:
             return

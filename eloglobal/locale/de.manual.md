@@ -105,6 +105,11 @@ die App Discord im Windows-Lautstärkemixer leise und gibt ihm seine Lautstärke
 F9 oder die Schaltfläche Leute hören, um auch ihre eigenen Stimmen zu hören. Die Taste kannst du im Tab Eingang
 ändern.
 
+**Etwas verpasst? Strg+Alt+R** sagt die letzte Übersetzung noch einmal, in deinem Kopfhörer. **Strg+Alt+L** legt
+die Sprache, die sie sprechen, auf die fest, die die App gerade gehört hat: Die Erkennung wird schneller, und deine
+Antworten gehen in diese Sprache. Drücke die Taste erneut für Automatisch erkennen, wenn du in eine andere Gruppe
+wechselst. Beide Tasten kannst du im Tab Eingang ändern, und im Tab Live gibt es auch Knöpfe dafür.
+
 **Eine Stimme, der Reihe nach.** Die Übersetzungen aus dem Anruf und die vorgelesenen Chatnachrichten teilen sich
 eine Stimme, sie reden also nie durcheinander. Alles wird in der Reihenfolge gesagt, in der es gesprochen wurde,
 und nichts wird ausgelassen: Der nächste Satz wird vorbereitet, während der aktuelle läuft, und wenn sich Sätze

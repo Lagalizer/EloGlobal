@@ -1,4 +1,4 @@
-"""Paths, profiles (save/load) and the small store for the one secret the app keeps.
+r"""Paths, profiles (save/load) and the small store for the one secret the app keeps.
 
 Where things live:
 - ROOT           the app folder. Read-only when installed from a store (MSIX / Steam): only program files, the
@@ -118,6 +118,8 @@ def default_profile() -> dict:
             "mic_mode": "vad",             # vad | ptt | toggle
             "ptt_key": "f8",
             "hear_key": "f9",              # toggles hearing the people in the call (their original voices)
+            "repeat_key": "ctrl+alt+r",    # say the last translation again
+            "lang_key": "ctrl+alt+l",      # lock "they speak" to the language heard from them / back to auto
             "listen_vad": {"auto": True, "threshold_db": -45.0, "silence_ms": 550, "min_speech_ms": 350,
                            "max_utterance_s": 12.0, "pre_roll_ms": 300},
             "mic_vad": {"auto": True, "threshold_db": -42.0, "silence_ms": 500, "min_speech_ms": 300,
@@ -248,19 +250,37 @@ def migrate(data: dict) -> dict:
 
 def load_profile(name: str) -> dict:
     p = profile_path(name)
-    data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    data = {}
+    if p.exists():
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                raise ValueError("not a profile")
+        except ValueError:
+            # A damaged profile (edited by hand, disk error) used to stop EloGlobal from starting at all: keep it
+            # aside as <name>.json.broken and start this profile from the defaults.
+            try:
+                os.replace(p, p.with_name(p.name + ".broken"))
+            except OSError:
+                pass
+            data = {}
     prof = deep_merge(default_profile(), migrate(data))
     prof["name"] = name
     return prof
+
+
+def write_atomic(path: Path, text: str) -> None:
+    """Write a file so that a crash or power cut leaves either the old or the new content, never half of it."""
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def save_profile(profile: dict, name: str | None = None) -> Path:
     if name:
         profile["name"] = name
     p = profile_path(profile["name"])
-    tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(profile, indent=2, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, p)
+    write_atomic(p, json.dumps(profile, indent=2, ensure_ascii=False))
     return p
 
 
@@ -315,7 +335,7 @@ def load_app_state() -> dict:
 
 
 def save_app_state(state: dict) -> None:
-    APP_STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    write_atomic(APP_STATE_FILE, json.dumps(state, indent=2))
 
 
 # --------------------------------------------------------------------------- secrets
@@ -378,4 +398,4 @@ class KeyStore:
     def save(self) -> None:
         with self._lock:
             blob = _dpapi(json.dumps(self._keys).encode("utf-8"), True)
-            self.path.write_text(json.dumps({"dpapi": base64.b64encode(blob).decode("ascii")}), encoding="utf-8")
+            write_atomic(self.path, json.dumps({"dpapi": base64.b64encode(blob).decode("ascii")}))

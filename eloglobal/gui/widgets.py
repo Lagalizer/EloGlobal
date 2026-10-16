@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import threading
 
-from PySide6.QtCore import QObject, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtCore import QObject, QRect, Qt, QTimer, Signal
+from PySide6.QtGui import QColor, QGuiApplication, QPainter
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFileDialog, QFormLayout, QHBoxLayout,
                                QLabel, QLineEdit, QPlainTextEdit, QPushButton, QSizePolicy, QSlider, QSpinBox,
                                QVBoxLayout, QWidget)
@@ -22,6 +22,20 @@ class _Relay(QObject):
 
 
 _pending: set = set()
+
+
+def on_screen(geometry) -> bool:
+    """A saved window position [x, y, w, h] is still visible - a monitor may have been unplugged since."""
+    try:
+        x, y, w, h = (int(v) for v in geometry)
+    except (TypeError, ValueError):
+        return False
+    r = QRect(x, y, max(1, w), max(1, h))
+    for s in QGuiApplication.screens():
+        part = s.availableGeometry().intersected(r)
+        if part.width() >= 120 and part.height() >= 40:
+            return True
+    return False
 
 
 def run_async(fn, on_done):

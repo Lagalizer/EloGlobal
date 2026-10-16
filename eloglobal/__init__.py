@@ -4,3 +4,5 @@ __version__ = "1.0.1"
 APP_NAME = "EloGlobal"
 # The address where PRIVACY.md is published (the stores ask for it). Empty: the copy in the app folder is shown.
 PRIVACY_URL = ""
+# Donations (PayPal). The button is shown only in the GitHub edition - the stores have their own payment rules.
+DONATE_URL = "https://paypal.me/bmgpt"

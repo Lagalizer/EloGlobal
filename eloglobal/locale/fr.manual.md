@@ -107,6 +107,12 @@ traducteur tourne, l'application baisse Discord dans le mélangeur de volume de 
 quand vous appuyez sur Arrêter. Appuyez sur F9, ou sur le bouton Entendre les personnes, pour entendre aussi leurs
 propres voix. Vous pouvez changer la touche dans l'onglet Entrée.
 
+**Vous avez raté quelque chose ? Ctrl+Alt+R** redit la dernière traduction, dans votre casque. **Ctrl+Alt+L** fixe
+la langue qu'ils parlent sur celle que l'application vient d'entendre : la reconnaissance est plus rapide, et vos
+réponses vont dans cette langue. Appuyez à nouveau pour revenir à Détection automatique quand vous rejoignez un
+autre groupe. Vous pouvez changer les deux touches dans l'onglet Entrée, et l'onglet Direct a aussi des boutons
+pour elles.
+
 **Une seule voix, dans l'ordre.** Les traductions de l'appel et les messages du chat lus à voix haute partagent une
 seule voix : elles ne parlent jamais en même temps. Tout est dit dans l'ordre où cela a été prononcé, et rien n'est
 sauté : la phrase suivante est préparée pendant que l'actuelle joue, et quand les phrases s'accumulent, la voix
