@@ -39,8 +39,9 @@ commercial distribution.
 | Voices | Piper voices trained from scratch (PD / CC0 / CC-BY), Kokoro-82M, Windows voices | see THIRD_PARTY_NOTICES.txt |
 | Phonemes | eSpeak NG 1.52 as a separate program (GPL-3, source included) | GPL-3.0 (separate) |
 
-EloGlobal itself is **MIT** (see [LICENSE](LICENSE)); every component is listed in
-[THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Privacy policy: [PRIVACY.md](PRIVACY.md).
+EloGlobal itself is **not open source**: © Lagalizer, all rights reserved. It is free to download and use, but it
+may not be sold, copied, redistributed or modified - see [LICENSE](LICENSE). (1.0.0 and 1.0.1 were released under
+MIT.) The third-party components keep their own licences, listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Privacy policy: [PRIVACY.md](PRIVACY.md).
 
 ## Development
 

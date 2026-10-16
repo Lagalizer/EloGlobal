@@ -80,8 +80,9 @@ class AboutDialog(QDialog):
         v.addWidget(head)
         info = QLabel("Real-time voice and chat translator for voice calls. Works with Discord - not affiliated with, "
                       "endorsed or sponsored by Discord Inc. “Discord” is a trademark of Discord Inc.<br>"
-                      "© 2026 Lagalizer. EloGlobal is open source software under the MIT licence. It includes "
-                      "other open source software and models - see the list below.")
+                      "© 2026 Lagalizer. EloGlobal is free to use, but it may not be sold, copied or changed - "
+                      "see the Licence tab. It includes open source software and models made by others - "
+                      "see the list below.")
         info.setWordWrap(True)
         info.setTextFormat(Qt.RichText)
         v.addWidget(info)

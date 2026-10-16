@@ -122,7 +122,7 @@ Measured on an Intel Core i5-10400F (6 cores, no NVIDIA card): see the latency n
    1232×706, vertical 748×896, page background 1438×810) and at least **5 screenshots 1920×1080** from
    `assets\screenshots`. Library assets from `assets\steam\library` (capsule 600×900, header 920×430, hero
    3840×1240, logo 1280×720) and icons from `assets\steam\icons` (shortcut icon .ico, app icon 184×184 jpg).
-5. Legal: add the privacy policy URL; EULA = the MIT licence text (or leave Steam's default) plus a note about
+5. Legal: add the privacy policy URL; EULA = the text of LICENSE (EloGlobal Licence, all rights reserved) plus a note about
    THIRD_PARTY_NOTICES.txt.
 6. Installation › General: launch option `EloGlobal.exe`, OS Windows, 64-bit only.
 7. Build: `runtime\python.exe -s tools\build_store.py`, then in `dist\steam\scripts` replace APPID/DEPOTID (file

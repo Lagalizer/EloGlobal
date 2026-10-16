@@ -5,7 +5,7 @@ with ONNX Runtime; the Windows voices come with Windows.
 
 Text -> phonemes: Piper and Kokoro voices were trained on the phonemes of eSpeak NG. eSpeak NG is GPL-3.0, so it is
 shipped *unchanged, as its own program* (engines\\espeak-ng\\espeak-ng.exe, with its source code) and only talked
-to through a pipe: text in, IPA phonemes out. None of its code is loaded into the app (EloGlobal itself is MIT).
+to through a pipe: text in, IPA phonemes out. None of its code is loaded into the app (EloGlobal has its own licence).
 The Piper and Kokoro runners below are our own code (they follow the published model formats); no GPL Python
 package (piper-tts 1.3+, phonemizer, espeakng-loader) is used.
 

@@ -1,5 +1,16 @@
 # EloGlobal - changelog
 
+## Unreleased
+
+- **Licence**: EloGlobal is no longer MIT. The new LICENSE (EloGlobal Licence) keeps all rights with Lagalizer: free
+  to download and use, but no selling, copying, redistributing or modifying without written permission. Third-party
+  components keep their own licences. 1.0.0 and 1.0.1 remain MIT. About window text updated in all 10 languages.
+- **Fixes**: Stop + Start while the engines load no longer starts the audio twice; chat translation Stop + Start
+  works while the old reader is still busy; no duplicate clipboard watchers and no popups for the app's own
+  clipboard use; echo check can't crash during Stop.
+- **Safer**: updates are checked against GitHub's SHA-256 checksum; local AI requests refuse redirects and proxies;
+  settings, secrets and the Discord-volume file are written atomically.
+
 ## 1.0.1 - 2026-10-15 - text-only voice translation, GitHub download with updates
 
 - **Text only in voice calls**: Dashboard → *Speak the translations* (same as Live → *Speak translation*) off = the

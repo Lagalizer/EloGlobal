@@ -1,32 +1,56 @@
-MIT License
+EloGlobal Licence
 
-Copyright (c) 2026 Lagalizer
+Copyright (c) 2026 Lagalizer. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+EloGlobal (its source code, text, translations, documentation and artwork, including the logo and the store
+graphics in assets\) is owned by Lagalizer. It is NOT open source. The source code is published so that people
+can see what the app does; publishing it does not give anyone the right to reuse it.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. What you may do
+   - Download EloGlobal from an official source (the Lagalizer/EloGlobal GitHub releases, the Microsoft Store or
+     Steam), install it on your own computers and use it, free of charge.
+   - Read the source code to understand, check or audit how the app works.
+   - Make copies only as needed to install, run and back up your own installation.
+   - Share links to the official download pages.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. What you may NOT do, unless Lagalizer has given you written permission
+   - Sell, rent, lease or license EloGlobal or any part of it, or charge money for access to it, alone or bundled
+     with anything else.
+   - Copy, redistribute, re-upload or publish EloGlobal or any part of it (including its source code), whether
+     changed or unchanged, for free or for money - including on app stores, download sites or other repositories.
+   - Modify, translate, adapt or build other software on EloGlobal or any part of its code, or distribute any
+     such changed version (a "fork", a "mod" or a derived app).
+   - Remove or change the name, logo, copyright or licence notices, or publish EloGlobal under another name.
+   - Use EloGlobal's code, artwork or name in another product.
+
+   Forking the repository on GitHub is allowed only to the extent GitHub's Terms of Service require for public
+   repositories (viewing and forking on GitHub itself); it gives no right to use, change or distribute the code
+   outside GitHub or to do anything listed in section 2.
+
+3. Software made by others
+   EloGlobal includes and downloads software and models made by others. Each of them stays under its own licence
+   (see THIRD_PARTY_NOTICES.txt and the licenses\ folder), and nothing in this licence limits the rights those
+   licences give you for those parts. In particular:
+   - eSpeak NG (engines\espeak-ng) is a separate program under the GNU General Public License v3; its complete
+     source code is included in licenses\espeak-ng.
+   - Qt / PySide6 and the other LGPL libraries are used unmodified as separate, replaceable files; you may
+     replace them with your own versions and, only as far as needed to debug such changes, reverse-engineer the
+     parts of EloGlobal that use them, as the GNU LGPL allows.
+
+4. No warranty
+   EloGlobal is provided "as is", without warranty of any kind, express or implied, including but not limited to
+   the warranties of merchantability, fitness for a particular purpose and non-infringement. In no event shall
+   Lagalizer be liable for any claim, damages or other liability, whether in an action of contract, tort or
+   otherwise, arising from, out of or in connection with EloGlobal or its use.
+
+5. Ending
+   This licence ends automatically if you break it. You must then stop using EloGlobal and delete your copies.
+
+Versions of EloGlobal released before this licence (1.0.0 and 1.0.1) were published under the MIT licence; this
+licence applies to every later version and to all changes made after those releases.
+
+For permission to do anything not allowed above, contact Lagalizer through https://github.com/Lagalizer.
 
 ---------------------------------------------------------------------------------
-This licence covers EloGlobal's own code, text and artwork (the logo and the store
-graphics in assets\). EloGlobal includes and downloads software and models made by
-others, each under its own licence - see THIRD_PARTY_NOTICES.txt and the licenses\
-folder. In particular, eSpeak NG (engines\espeak-ng) is a separate program under
-the GNU General Public License v3; its complete source code is included in
-licenses\espeak-ng.
-
-"Discord" is a trademark of Discord Inc. EloGlobal works with the Discord app but is
-not affiliated with, endorsed or sponsored by Discord Inc.
+"Discord" is a trademark of Discord Inc. EloGlobal works with the Discord app but is not affiliated with, endorsed
+or sponsored by Discord Inc.
